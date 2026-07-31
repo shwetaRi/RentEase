@@ -1,6 +1,6 @@
-# project_rent_ease
+# project_RentEase
 
-A new Flutter project.
+A platform designed to make renting reliable, transparent and stress-free in Dhaka's urban housing market
 
 ## Getting Started
 
