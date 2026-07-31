@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const rentEase());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class rentEase extends StatelessWidget {
+  const rentEase({super.key});
 
   // This widget is the root of your application.
   @override
@@ -28,9 +28,9 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: .fromSeed(seedColor: Colors.blueAccent),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'RentEase Demo Home Page'),
     );
   }
 }
