@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const rentEase());
+  runApp(const RentEase());
 }
 
-class rentEase extends StatelessWidget {
-  const rentEase({super.key});
+class RentEase extends StatelessWidget {
+  const RentEase({super.key});
 
   // This widget is the root of your application.
   @override
@@ -54,7 +54,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  int counter = 0;
 
   void _incrementCounter() {
     setState(() {
@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+      counter = counter+2;
     });
   }
 
