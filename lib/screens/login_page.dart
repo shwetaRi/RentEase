@@ -1,88 +1,290 @@
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool isLandlord = true;
+  bool rememberMe = false;
+  bool obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("RentEase Login"),
-        centerTitle: true,
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Center(
+      backgroundColor: Colors.white,
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.home_work,
-                size: 80,
-                color: Colors.green,
+
+              const SizedBox(height: 15),
+
+              Row(
+                children: [
+
+                  CircleAvatar(
+                    backgroundColor: Colors.grey.shade200,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {},
+                    ),
+                  ),
+
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        "RentEase",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 40),
+
+                ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 35),
 
-              const Text(
-                "Welcome Back!",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+              const Center(
+                child: Text(
+                  "Welcome Back",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
 
               const SizedBox(height: 10),
 
-              const Text(
-                "Login to continue using RentEase",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+              const Center(
+                child: Text(
+                  "Stay connected by signing in with your email\nand password to access your account.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 35),
 
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  prefixIcon: const Icon(Icons.lock),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  child: const Text("Login"),
+              const Center(
+                child: Text(
+                  "Choose your role",
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
                 ),
               ),
 
               const SizedBox(height: 15),
 
-              TextButton(
-                onPressed: () {},
-                child: const Text(
-                  "Don't have an account? Sign Up",
+              Row(
+                children: [
+
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isLandlord = true;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: BoxDecoration(
+                          color: isLandlord
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+
+                            Icon(Icons.key),
+
+                            SizedBox(width: 8),
+
+                            Text("Landlord"),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 10),
+
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isLandlord = false;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        decoration: BoxDecoration(
+                          color: !isLandlord
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+
+                            Icon(Icons.person_outline),
+
+                            SizedBox(width: 8),
+
+                            Text("Tenant"),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                ],
+              ),
+
+              const SizedBox(height: 30),
+
+              const Text(
+                "Email Address",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+
+              const SizedBox(height: 8),
+
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "Your Email",
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              const Text(
+                "Password",
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              TextField(
+                obscureText: obscurePassword,
+                decoration: InputDecoration(
+                  hintText: "Secure Password",
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        obscurePassword = !obscurePassword;
+                      });
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 18),
+
+              Row(
+                children: [
+
+                  Checkbox(
+                    value: rememberMe,
+                    onChanged: (value) {
+                      setState(() {
+                        rememberMe = value!;
+                      });
+                    },
+                  ),
+
+                  const Text("Remember me"),
+
+                  const Spacer(),
+
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text("Forgot Password?"),
+                  ),
+
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () {},
+                  child: const Text(
+                    "Sign In",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+
+                  const Text("Don't have an account? "),
+
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text("Sign Up"),
+                  )
+
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
             ],
           ),
         ),
