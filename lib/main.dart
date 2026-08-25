@@ -14,7 +14,7 @@ class RentEase extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'RentEase',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
       home: const LoginPage(),
