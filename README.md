@@ -1,6 +1,6 @@
 # project_RentEase
 
-A platform designed to make renting reliable, transparent and stress-free in Dhaka's urban housing market
+A platform designed to make renting reliable, transparent and stress-free in Dhaka's urban housing market.
 
 ## Getting Started
 
