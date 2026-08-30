@@ -13,6 +13,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _acceptedTerms = false;
 
   @override
   void dispose() {
@@ -28,6 +29,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(content: Text('Creating account...')),
       );
+      if (!_acceptedTerms) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please accept the Terms & Conditions')),
+        );
+        return;
+      }
     }
   }
 
@@ -88,7 +95,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Email Field
+
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -110,7 +117,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Password Field
+
                   TextFormField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
