@@ -12,7 +12,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
 
   @override
@@ -20,7 +19,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -64,7 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Join RentEase ',
+                    'Join Sprout Speaks today',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.8),
@@ -90,6 +88,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Email Field
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -111,6 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Password Field
                   TextFormField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
@@ -145,6 +145,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 28),
 
+                  // Sign Up Button
                   ElevatedButton(
                     onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
@@ -167,6 +168,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Login Redirection Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
