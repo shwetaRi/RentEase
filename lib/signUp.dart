@@ -12,6 +12,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _acceptedTerms = false;
 
@@ -20,6 +21,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -117,7 +119,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 16),
 
-
                   TextFormField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
@@ -150,8 +151,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 16),
 
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: !_isPasswordVisible,
+                    style: TextStyle(color: Colors.white),
+                    decoration: _buildInputDecoration(
+                        labelText: 'Confirm Password',
+                        icon: Icons.lock_reset_outlined
+                    ),
+                    validator: (value){
+                      if(value != _passwordController.text){
+                        return 'Password do not match';
+                      }
+                      return null;
+                    }
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _acceptedTerms,
+                        activeColor: Color(0xFF81C784),
+                        onChanged: (val){
+                          setState(() => _acceptedTerms = val ?? false
+                          );
+                        }
+                      ),
+                      const Text(
+                        'I accept the terms and conditions',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14
+                        ),
+                      )
+                    ],
+                  ),
                   ElevatedButton(
                     onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
