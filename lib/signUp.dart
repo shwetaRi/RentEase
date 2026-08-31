@@ -151,7 +151,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                   ),
                   const SizedBox(height: 28),
-
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _acceptedTerms,
+                        activeColor: Color(0xFF81C784),
+                        onChanged: (val){
+                          setState(() => _acceptedTerms = val ?? false
+                          );
+                        }
+                      ),
+                      const Text(
+                        'I accept the terms and conditions',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14
+                        ),
+                      )
+                    ],
+                  ),
                   ElevatedButton(
                     onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
