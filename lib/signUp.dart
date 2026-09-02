@@ -13,8 +13,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _acceptedTerms = false;
+
 
   @override
   void dispose() {
@@ -22,6 +24,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _phoneNumberController.dispose();
     super.dispose();
   }
 
@@ -43,7 +46,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1B3B2B), // Matching forest green theme
+      backgroundColor: Color(0xFF1B3B2B),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -71,7 +74,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Join Sprout Speaks today',
+                    'Join RentEase today',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.8),
@@ -80,7 +83,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 36),
 
-                  // Full Name Field
                   TextFormField(
                     controller: _nameController,
                     style: const TextStyle(color: Colors.white),
@@ -167,6 +169,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       }
                       return null;
                     }
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _phoneNumberController,
+                    keyboardType: TextInputType.phone,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: _buildInputDecoration(
+                      labelText: 'Phone Number',
+                      icon: Icons.phone_outlined,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your phone number';
+                      }
+                      if (!RegExp(r'^[0-9]{10,11}$').hasMatch(value.trim())) {
+                        return 'Enter a valid phone number';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 28),
                   Row(
