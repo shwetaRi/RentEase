@@ -15,6 +15,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _acceptedTerms = false;
+  bool _obsecurePassword = true;
 
   @override
   void dispose() {
@@ -43,7 +44,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1B3B2B), // Matching forest green theme
+      backgroundColor: Color(0xFF1B3B2B),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -71,7 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Join Sprout Speaks today',
+                    'Join RentEase today',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white.withValues(alpha: 0.8),
@@ -80,7 +81,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 36),
 
-                  // Full Name Field
                   TextFormField(
                     controller: _nameController,
                     style: const TextStyle(color: Colors.white),
