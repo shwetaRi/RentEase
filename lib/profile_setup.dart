@@ -165,11 +165,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     maxLines: 3,
                     maxLength: 150,
                     style: const TextStyle(color: Colors.white),
+                    onChanged: (_) => setState(() {}),
                     decoration: _buildInputDecoration(
                       labelText: 'Short Bio',
                       icon: Icons.notes_rounded,
                     ).copyWith(
-                      counterStyle: const TextStyle(color: Colors.white54),
+                      counterStyle: TextStyle(
+                        color: _bioController.text.length > 130 ? Colors.amberAccent : Colors.white54,
+                        fontWeight: _bioController.text.length > 130 ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
