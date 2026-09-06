@@ -12,33 +12,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
-  bool _isPasswordVisible = false;
-  bool _acceptedTerms = false;
 
+  bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _phoneNumberController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Process account creation logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('Creating account...')),
-      );
-      if (!_acceptedTerms) {
+      FocusScope.of(context).unfocus(); // Close soft keyboard
+      setState(() => _isLoading = true);
+
+      // Simulate backend delay for presentation demo
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please accept the Terms & Conditions')),
+          const SnackBar(
+            content: Text('Account Created Successfully!'),
+            backgroundColor: Color(0xFFE86B42),
+          ),
         );
-        return;
+
+        // Navigate to ProfileSetupScreen
+        // Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileSetupScreen()));
       }
     }
   }
@@ -46,64 +51,89 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1B3B2B),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header Title
+                  // 1. RentEase Brand Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.home_work_rounded,
+                        color: Color(0xFFE86B42), // RentEase Orange Accent
+                        size: 38,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'RentEase',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade900,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+
+                  // 2. Page Title & Subtitle
                   const Text(
                     'Create Account',
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black87,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
-                    'Join RentEase today',
+                    'Find your perfect verified home today',
                     style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 32),
 
+                  // 3. Full Name Input
                   TextFormField(
                     controller: _nameController,
-                    style: const TextStyle(color: Colors.white),
+                    textCapitalization: TextCapitalization.words,
+                    textInputAction: TextInputAction.next,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: _buildInputDecoration(
                       labelText: 'Full Name',
-                      icon: Icons.person_outline,
+                      icon: Icons.person_outline_rounded,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your name';
+                        return 'Please enter your full name';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
 
-
+                  // 4. Email Input
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: Colors.white),
+                    textInputAction: TextInputAction.next,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: _buildInputDecoration(
                       labelText: 'Email Address',
                       icon: Icons.email_outlined,
@@ -112,29 +142,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                          .hasMatch(value)) {
-                        return 'Enter a valid email address';
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+                        return 'Please enter a valid email address';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
 
+                  // 5. Password Input with Toggle
                   TextFormField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
-                    style: const TextStyle(color: Colors.white),
+                    textInputAction: TextInputAction.done,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: _buildInputDecoration(
                       labelText: 'Password',
-                      icon: Icons.lock_outline,
+                      icon: Icons.lock_outline_rounded,
                     ).copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: Colors.white70,
+                          _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.grey.shade500,
                         ),
                         onPressed: () {
                           setState(() {
@@ -153,101 +182,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
-
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    obscureText: !_isPasswordVisible,
-                    style: TextStyle(color: Colors.white),
-                    decoration: _buildInputDecoration(
-                        labelText: 'Confirm Password',
-                        icon: Icons.lock_reset_outlined
-                    ),
-                    validator: (value){
-                      if(value != _passwordController.text){
-                        return 'Password do not match';
-                      }
-                      return null;
-                    }
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _phoneNumberController,
-                    keyboardType: TextInputType.phone,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: _buildInputDecoration(
-                      labelText: 'Phone Number',
-                      icon: Icons.phone_outlined,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your phone number';
-                      }
-                      if (!RegExp(r'^[0-9]{10,11}$').hasMatch(value.trim())) {
-                        return 'Enter a valid phone number';
-                      }
-                      return null;
-                    },
-                  ),
                   const SizedBox(height: 28),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: _acceptedTerms,
-                        activeColor: Color(0xFF81C784),
-                        onChanged: (val){
-                          setState(() => _acceptedTerms = val ?? false
-                          );
-                        }
-                      ),
-                      const Text(
-                        'I accept the terms and conditions',
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14
-                        ),
-                      )
-                    ],
-                  ),
+
+                  // 6. Primary Action Button
                   ElevatedButton(
-                    onPressed: _submitForm,
+                    onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF81C784),
-                      foregroundColor: const Color(0xFF1B3B2B),
+                      backgroundColor: const Color(0xFFE86B42), // RentEase Orange
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 2,
+                      elevation: 0,
                     ),
-                    child: const Text(
-                      'SIGN UP',
+                    child: _isLoading
+                        ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
+                      'Sign Up',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
 
-                  // Login Redirection Link
+                  // 7. Already have an account row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         'Already have an account? ',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.of(context).pop();
+                          // Navigate to Login Screen
                         },
                         child: const Text(
                           'Log In',
                           style: TextStyle(
-                            color: Color(0xFF81C784),
+                            color: Color(0xFFE86B42),
                             fontWeight: FontWeight.bold,
+                            fontSize: 14,
                           ),
                         ),
                       ),
@@ -262,32 +247,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  // Consistent Input Decoration helper matching the Dashboard style
   InputDecoration _buildInputDecoration({
     required String labelText,
     required IconData icon,
   }) {
     return InputDecoration(
       labelText: labelText,
-      labelStyle: const TextStyle(color: Colors.white70),
-      prefixIcon: Icon(icon, color: Colors.white70),
+      labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+      prefixIcon: Icon(icon, color: Colors.grey.shade500),
+      filled: true,
+      fillColor: Colors.grey.shade50,
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.white38),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: Colors.grey.shade200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF81C784), width: 2),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFFE86B42), width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.blueAccent),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.redAccent),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
       ),
-      filled: true,
-      fillColor: Colors.white.withValues(alpha: 0.05),
     );
   }
 }
