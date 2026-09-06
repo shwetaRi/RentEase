@@ -11,8 +11,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _bioController = TextEditingController();
-
-  String _userRole = 'Student'; // Default role selection
+  String? _selectedMaritalStatus;
+  String _userRole = 'Tenant';
   bool _isLoading = false;
 
   @override
@@ -138,26 +138,56 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
                   // Role Selection Dropdown
                   DropdownButtonFormField<String>(
-                    value: _userRole,
+                    initialValue: _userRole,
                     dropdownColor: const Color(0xFF1B3B2B),
                     style: const TextStyle(color: Colors.white),
                     decoration: _buildInputDecoration(
                       labelText: 'Primary Role',
                       icon: Icons.work_outline_rounded,
                     ),
-                    items: ['Student', 'Professional', 'Hobbyist', 'Other']
-                        .map((role) => DropdownMenuItem(
-                      value: role,
-                      child: Text(role),
-                    ))
+                    items: ['Tenant', 'Landlord / Owner', 'Other']
+                        .map((role) => DropdownMenuItem(value: role, child: Text(role)))
                         .toList(),
                     onChanged: (val) {
                       if (val != null) {
-                        setState(() => _userRole = val);
+                        setState(() {
+                          _userRole = val;
+                          // Reset marital status if switching away from Tenant
+                          if (_userRole != 'Tenant') {
+                            _selectedMaritalStatus = null;
+                          }
+                        });
                       }
                     },
                   ),
                   const SizedBox(height: 16),
+
+// Show Marital Status ONLY if the user is a Tenant
+                  if (_userRole == 'Tenant') ...[
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedMaritalStatus,
+                      dropdownColor: const Color(0xFF1B3B2B),
+                      style: const TextStyle(color: Colors.white),
+                      iconEnabledColor: Colors.white70,
+                      decoration: _buildInputDecoration(
+                        labelText: 'Marital Status',
+                        icon: Icons.favorite_border_rounded,
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'Bachelor', child: Text('Bachelor')),
+                        DropdownMenuItem(value: 'Married', child: Text('Married')),
+                        DropdownMenuItem(value: 'Prefer not to say', child: Text('Prefer not to say')),
+                      ],
+                      onChanged: (value) => setState(() => _selectedMaritalStatus = value),
+                      validator: (value) {
+                        if (_userRole == 'Tenant' && (value == null || value.isEmpty)) {
+                          return 'Please select your marital status';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Short Bio Field
                   TextFormField(
