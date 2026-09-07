@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/widgets/category.dart';
 import 'package:project_rent_ease/widgets/rent_card.dart';
+import 'package:project_rent_ease/widgets/bottom_nav_bar.dart';
 
 class HomePage extends StatefulWidget {
+
+
   const HomePage({super.key});
 
   @override
@@ -10,6 +13,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int currentIndex=0;
   String profileImagePath = 'assets/images/profile.png';
   @override
   Widget build(BuildContext context) {
@@ -132,21 +136,21 @@ class _HomePageState extends State<HomePage> {
                         imagePath:'assets/images/card_image_1.png'
                     ),
                     RentCard(
-                        title: 'Family Flat Rent',
-                        location: 'Road #12, Block G, Dhanmondi',
-                        amount: 30000,
+                        title: 'Family & Professional Living',
+                        location: 'Road #10, Block C, Dhanmondi',
+                        amount: 25000,
                         imagePath:'assets/images/card_image_3.png'
                     ),
                     RentCard(
-                        title: 'Family Flat Rent',
-                        location: 'Road #12, Block G, Dhanmondi',
-                        amount: 30000,
+                        title: 'Her Living Hub(only Girls)',
+                        location: 'Road #11, Block D, Dhanmondi',
+                        amount: 35000,
                         imagePath:'assets/images/card_image_4.png'
                     ),
                     RentCard(
-                        title: 'Family Flat Rent',
-                        location: 'Road #12, Block G, Dhanmondi',
-                        amount: 30000,
+                        title: 'For Bachelor Only',
+                        location: 'Road #10, Block A, Dhanmondi',
+                        amount: 22000,
                         imagePath:'assets/images/card_image_1.png'
                     ),
                   ],
@@ -157,6 +161,16 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      bottomNavigationBar: BottomNavBar(
+              currentIndex: currentIndex,
+              onTap: (index) {
+                setState(() {
+                  currentIndex = index;
+                });
+              },
+
+        ),
+
     );
   }
 }
