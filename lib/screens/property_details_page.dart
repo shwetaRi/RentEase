@@ -4,11 +4,7 @@ import 'package:project_rent_ease/widgets/property_image.dart';
 import 'package:project_rent_ease/widgets/property_details.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
-  final Map<String, dynamic>? propertyData;
-  const PropertyDetailsPage({
-    super.key,
-  this.propertyData
-  });
+  const PropertyDetailsPage({super.key});
 
   @override
   State<PropertyDetailsPage> createState() => _PropertyState();
@@ -18,13 +14,6 @@ class _PropertyState extends State<PropertyDetailsPage> {
   bool isFavourite=false;
   @override
   Widget build(BuildContext context) {
-    final String category = widget.propertyData?['category'] ?? 'Flat';
-    final String rooms = widget.propertyData?['rooms']?.toString() ?? '3';
-    final String bathrooms = widget.propertyData?['bathrooms']?.toString() ?? '2';
-    final String sqft = (widget.propertyData?['squareFeet'] != null &&
-        widget.propertyData!['squareFeet'].toString().isNotEmpty)
-        ? widget.propertyData!['squareFeet'].toString()
-        : '1550';
     return  Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -80,7 +69,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                            children: [
                              Text(
-                               '$category Rent Home',
+                               'Flat Rent Home',
                                style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
@@ -206,9 +195,9 @@ class _PropertyState extends State<PropertyDetailsPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                PropertyDetails.bedrooms(value: rooms),
-                                PropertyDetails.bathrooms(value: bathrooms),
-                                PropertyDetails.area(value: sqft)
+                                PropertyDetails.bedrooms(value: '3'),
+                                PropertyDetails.bathrooms(value: '2'),
+                                PropertyDetails.area(value: '1550')
                               ],
                             ),
                           ],
