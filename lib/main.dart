@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
 import 'package:project_rent_ease/screens/property_details_page.dart';
+import 'package:project_rent_ease/screens/select_category.dart';
 import 'screens/login_page.dart';
 import 'screens/property_details_page.dart';
-
+import 'package:project_rent_ease/screens/property_info_page.dart';
 void main() {
   runApp(const RentEase());
 }
@@ -20,7 +21,7 @@ class RentEase extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: const PropertyDetailsPage(),
+      home: const SelectCategory(),
     );
   }
 }
