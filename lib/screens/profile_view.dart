@@ -20,9 +20,9 @@ class ProfilePage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Colors.black87),
+            icon: const Icon(Icons.edit_outlined, color: Colors.black),
             onPressed: () {
-              // Action to edit profile
+              // Profile change logic
             },
           ),
         ],
@@ -77,27 +77,6 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatItem('Applications', '2'),
-                  Container(height: 30, width: 1, color: Colors.grey.shade300),
-                  _buildStatItem('Saved Homes', '5'),
-                  Container(height: 30, width: 1, color: Colors.grey.shade300),
-                  _buildStatItem('Reviews', '1'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
             // Options List
             Container(
               decoration: BoxDecoration(
@@ -146,8 +125,8 @@ class ProfilePage extends StatelessWidget {
                 icon: Icons.logout,
                 title: 'Log Out',
                 color: Colors.red,
-                onTap: () {
-                },
+                showArrow: false, // Hides chevron for logout
+                onTap: () {},
               ),
             ),
           ],
@@ -156,51 +135,43 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String label, String count) {
-    return Column(
-      children: [
-        Text(
-          count,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFE86B42),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildProfileOption({
     required IconData icon,
     required String title,
     required VoidCallback onTap,
     Color color = Colors.black87,
+    bool showArrow = true,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: color),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-          color: color,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: color,
+                ),
+              ),
+            ),
+            if (showArrow)
+              const Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: Colors.grey,
+              ),
+          ],
         ),
       ),
-      trailing: const Icon(
-        Icons.chevron_right,
-        size: 20,
-        color: Colors.grey,
-      ),
-      onTap: onTap,
     );
   }
 }

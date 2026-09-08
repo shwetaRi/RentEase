@@ -44,7 +44,7 @@ class _DashboardPageState extends State<DashboardPage>
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_outlined,
-                color: Colors.black87),
+                color: Colors.black),
             onPressed: () {},
           ),
         ],

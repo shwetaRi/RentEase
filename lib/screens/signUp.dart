@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_rent_ease/screens/login_page.dart';
 import 'package:project_rent_ease/screens/profile_setup.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -9,13 +10,14 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+  bool _isSubmit = false;
 
   @override
   void dispose() {
@@ -26,15 +28,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _submitForm() {
-    if (_formKey.currentState!.validate()) {
+    if (formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account Created Successfully!'),
-            backgroundColor: Color(0xFFE86B42),
-          ),
-        );
+      setState(() {
+        _isSubmit = true;
+      });
+
         // Navigate to ProfileSetup
         Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileSetupScreen()));
     }
@@ -52,7 +52,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
             child: Form(
-              key: _formKey,
+              key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -94,13 +94,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    style: const TextStyle(color: Colors.black87),
+                    style: TextStyle(color: Colors.black),
                     decoration: _buildInputDecoration(
                       labelText: 'Email Address',
-                      icon: Icons.email_outlined,
                     ),
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
+                      if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
                       return null;
@@ -113,10 +112,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     textInputAction: TextInputAction.done,
-                    style: const TextStyle(color: Colors.black87),
+                    style: TextStyle(color: Colors.black),
                     decoration: _buildInputDecoration(
                       labelText: 'Password',
-                      icon: Icons.lock_outline_rounded,
                     ).copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -140,12 +138,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return null;
                     },
                   ),
+                  if (_isSubmit)
+                     Padding(
+                      padding: EdgeInsets.only(top: 16.0),
+                      child: Center(
+                      child: Text(
+                        'Account Created Successfully!',
+                        style: TextStyle(
+                          color: Color(0xFFE86B42),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                     ),
+
                   const SizedBox(height: 28),
 
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _submitForm,
+                    onPressed: () {
+                      if(_isLoading){
+                        return null;
+                      } else{
+                        return _submitForm();
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE86B42),
+                      backgroundColor:  Color(0xFFE86B42),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -172,7 +190,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // 7. Already have an account row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -182,7 +199,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // Navigate to Login Screen
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => const LoginPage()),
+                          );
                         },
                         child: const Text(
                           'Log In',
@@ -205,12 +224,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   InputDecoration _buildInputDecoration({
     required String labelText,
-    required IconData icon,
   }) {
     return InputDecoration(
       labelText: labelText,
       labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-      prefixIcon: Icon(icon, color: Colors.grey.shade500),
       filled: true,
       fillColor: Colors.grey.shade50,
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),

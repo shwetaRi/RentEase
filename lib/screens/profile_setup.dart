@@ -13,7 +13,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
 
-  // Controllers
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController nidController = TextEditingController();
@@ -81,7 +80,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       ),
       body: Column(
         children: [
-          // Step Progress Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             child: Row(
@@ -117,7 +115,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               physics: const NeverScrollableScrollPhysics(),
               onPageChanged: (index) => setState(() => _currentStep = index),
               children: [
-                // Instantiating with positional order (no labels, no 'required')
                 ProfileStepOneWidget(
                   usernameController,
                   phoneController,
@@ -127,7 +124,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   nextPage,
                 ),
                 ProfileStepTwoWidget(
-                  dobController,
                   occupationController,
                   institutionController,
                   selectedGender,
@@ -146,9 +142,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Widget _buildProgressStep({
-    required int stepNumber,
-    required String title,
-    required bool isActive,
+     required int stepNumber,
+     required String title,
+     required bool isActive,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

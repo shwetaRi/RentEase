@@ -6,7 +6,6 @@ class AppliedTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appliedProperties = [
-
       {
         'title': 'Studio Flat Rent',
         'location': 'Road #8A, Dhanmondi',
@@ -30,7 +29,7 @@ class AppliedTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20.0),
       children: [
-        // Total Applications Banner
+        // Top Info Card
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -64,35 +63,27 @@ class AppliedTab extends StatelessWidget {
               ),
               const CircleAvatar(
                 backgroundColor: Color(0xFFFFF0EC),
-                child: Icon(Icons.assignment_outlined,
-                    color: Color(0xFFE86B42)),
+                child: Icon(
+                  Icons.assignment_outlined,
+                  color: Color(0xFFE86B42),
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 20),
 
-        // Grid View
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: appliedProperties.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.72,
-          ),
-          itemBuilder: (context, index) {
-            final item = appliedProperties[index];
-            return _buildAppliedCard(
+        // List of Applied Property Cards
+        for (var item in appliedProperties)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: _buildAppliedCard(
               title: item['title']!,
               location: item['location']!,
               price: item['price']!,
               imagePath: item['image']!,
-            );
-          },
-        ),
+            ),
+          ),
       ],
     );
   }
@@ -103,26 +94,21 @@ class AppliedTab extends StatelessWidget {
     required String price,
     required String imagePath,
   }) {
-    return InkWell(
-      onTap: () {
-        // Tap handler for property card
-      },
-      borderRadius: BorderRadius.circular(20),
+    return GestureDetector(
+      onTap: () {},
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: ClipRRect(
+          // Fixed height Container replacing Expanded
+          Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(20),
-              child: Container(
-                width: double.infinity,
-                color: Colors.grey.shade200,
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.home, size: 40, color: Colors.grey),
-                ),
+              image: DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -132,16 +118,17 @@ class AppliedTab extends StatelessWidget {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Colors.black,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              Icon(Icons.location_on_outlined,
-                  size: 14, color: Colors.grey.shade500),
+              Icon(
+                Icons.location_on_outlined,
+                size: 14,
+                color: Colors.grey.shade500,
+              ),
               const SizedBox(width: 2),
               Expanded(
                 child: Text(
@@ -150,8 +137,6 @@ class AppliedTab extends StatelessWidget {
                     fontSize: 12,
                     color: Colors.grey.shade500,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

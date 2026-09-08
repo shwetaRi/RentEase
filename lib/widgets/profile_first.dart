@@ -50,16 +50,21 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
           // Username
           TextFormField(
             controller: widget.usernameController,
-            decoration: _inputDecoration('Username', Icons.person_outline),
-            validator: (val) =>
-            val == null || val.isEmpty ? 'Please enter a username' : null,
+            decoration: _inputDecoration('Username'),
+            validator: (val) {
+              if(val == null || val.isEmpty){
+                return 'Please enter a username' ;
+              } else{
+                return null;
+              }
+            },
           ),
           const SizedBox(height: 16),
 
           // Primary Role
           DropdownButtonFormField<String>(
             initialValue: widget.selectedRole,
-            decoration: _inputDecoration('Primary Role', Icons.badge_outlined),
+            decoration: _inputDecoration('Primary Role'),
             items: const [
               DropdownMenuItem(value: 'Tenant', child: Text('Tenant')),
               DropdownMenuItem(value: 'Landlord', child: Text('Landlord')),
@@ -75,10 +80,14 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
             controller: widget.phoneController,
             keyboardType: TextInputType.phone,
             decoration:
-            _inputDecoration('Contact Number', Icons.phone_outlined),
-            validator: (val) => val == null || val.isEmpty
-                ? 'Please enter your phone number'
-                : null,
+            _inputDecoration('Contact Number'),
+            validator: (val) {
+              if(val == null || val.isEmpty){
+                return 'Please enter your phone number' ;
+              } else{
+                return null;
+              }
+            }
           ),
           const SizedBox(height: 16),
 
@@ -87,10 +96,14 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
             controller: widget.nidController,
             keyboardType: TextInputType.number,
             decoration:
-            _inputDecoration('NID Number', Icons.credit_card_outlined),
-            validator: (val) => val == null || val.isEmpty
-                ? 'Please enter your NID number'
-                : null,
+            _inputDecoration('NID Number'),
+            validator: (val) {
+              if(val == null || val.isEmpty){
+                return 'Please enter your NID number' ;
+              } else{
+                return null;
+              }
+            }
           ),
           const SizedBox(height: 32),
 
@@ -125,10 +138,9 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon) {
+  InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: Colors.grey.shade600),
       filled: true,
       fillColor: Colors.grey.shade50,
       border: OutlineInputBorder(
