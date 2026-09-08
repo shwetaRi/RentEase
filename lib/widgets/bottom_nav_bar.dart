@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:project_rent_ease/screens/dashboard_page.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const BottomNavBar({
+     BottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
@@ -34,15 +35,19 @@ class BottomNavBar extends StatelessWidget {
           ),
 
           GestureDetector(
-            onTap: () => onTap(1),
-            child: Image(
-              image: AssetImage(
-                currentIndex == 1
-                    ? 'assets/icons/search_selected.png'
-                    : 'assets/icons/search.png',
-              ),
-              height: 24,
-              width: 24,
+            onTap: () {
+              onTap(1);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DashboardPage(),
+                ),
+              );
+            },
+            child: Icon(
+              currentIndex == 1 ? Icons.dashboard : Icons.dashboard_outlined,
+              size: 24,
+              color: currentIndex == 1 ? const Color(0xFFF9834D) : Colors.grey,
             ),
           ),
 
