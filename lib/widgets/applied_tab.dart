@@ -29,7 +29,6 @@ class AppliedTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20.0),
       children: [
-        // Top Info Card
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -56,7 +55,7 @@ class AppliedTab extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -73,7 +72,6 @@ class AppliedTab extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // List of Applied Property Cards
         for (var item in appliedProperties)
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
@@ -99,7 +97,6 @@ class AppliedTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Fixed height Container replacing Expanded
           Container(
             height: 180,
             width: double.infinity,
