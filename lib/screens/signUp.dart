@@ -34,8 +34,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _isSubmit = true;
       });
-
-        // Navigate to ProfileSetup
         Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileSetupScreen()));
     }
   }

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/widgets/property_image.dart';
 import 'package:project_rent_ease/widgets/property_details.dart';
+import 'package:project_rent_ease/screens/login_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
   const PropertyDetailsPage({super.key});
@@ -247,7 +248,12 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                    onPressed: (){},
+                    onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPage()),
+                      );
+                    },
                     child: Text(
                       'Book Now',
                       style: TextStyle(
