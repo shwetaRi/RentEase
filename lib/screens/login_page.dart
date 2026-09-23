@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/screens/signUp.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,6 +13,29 @@ class _LoginPageState extends State<LoginPage> {
   bool isLandlord = true;
   bool rememberMe = false;
   bool obscurePassword = true;
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+ Future<void>signIn() async {
+
+   try {
+     await FirebaseAuth.instance.signInWithEmailAndPassword(email:emailController.text.trim(), password: passwordController.text,);
+
+
+   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text("Login successful"),
+     ),
+   );
+
+   } on FirebaseAuthException catch (e) {
+     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message
+      ?? "Login failed"),
+     ),
+     );
+   }
+
+ }
+
 
   @override
   Widget build(BuildContext context) {
@@ -172,6 +196,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 8),
 
               TextField(
+                controller: emailController,
                 decoration: InputDecoration(
                   hintText: "Your Email",
                   filled: true,
@@ -196,6 +221,7 @@ class _LoginPageState extends State<LoginPage> {
 
               TextField(
                 obscureText: obscurePassword,
+                controller: passwordController,
                 decoration: InputDecoration(
                   hintText: "Secure Password",
                   filled: true,
@@ -258,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: signIn ,
                   child: const Text(
                     "Sign In",
                     style: TextStyle(
