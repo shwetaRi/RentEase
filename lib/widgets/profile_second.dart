@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ProfileStepTwoWidget extends StatelessWidget {
+class ProfileStepTwoWidget extends StatefulWidget {
   final TextEditingController occupationController;
   final TextEditingController institutionController;
   final String selectedGender;
@@ -10,8 +10,6 @@ class ProfileStepTwoWidget extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onSubmit;
   final bool isLoading;
-
-  static final _formKey = GlobalKey<FormState>();
 
   const ProfileStepTwoWidget(
       this.occupationController,
@@ -25,6 +23,13 @@ class ProfileStepTwoWidget extends StatelessWidget {
         this.isLoading = false,
         super.key,
       });
+
+  @override
+  State<ProfileStepTwoWidget> createState() => _ProfileStepTwoWidgetState();
+}
+
+class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +53,8 @@ class ProfileStepTwoWidget extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          //Gender
           DropdownButtonFormField<String>(
-            initialValue: selectedGender,
+            initialValue: widget.selectedGender,
             decoration: _inputDecoration('Gender'),
             items: const [
               DropdownMenuItem(value: 'Male', child: Text('Male')),
@@ -58,31 +62,29 @@ class ProfileStepTwoWidget extends StatelessWidget {
               DropdownMenuItem(value: 'Other', child: Text('Other')),
             ],
             onChanged: (val) {
-              if (val != null) onGenderChanged(val);
+              if (val != null) widget.onGenderChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          //Marital Status
           DropdownButtonFormField<String>(
-            initialValue: selectedMaritalStatus,
+            initialValue: widget.selectedMaritalStatus,
             decoration: _inputDecoration('Marital Status'),
             items: const [
               DropdownMenuItem(value: 'Single', child: Text('Single')),
               DropdownMenuItem(value: 'Married', child: Text('Married')),
             ],
             onChanged: (val) {
-              if (val != null) onMaritalStatusChanged(val);
+              if (val != null) widget.onMaritalStatusChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          //Occupation
           TextFormField(
-            controller: occupationController,
+            controller: widget.occupationController,
             decoration: _inputDecoration('Occupation'),
             validator: (val) {
-              if (val == null || val.isEmpty) {
+              if (val == null || val.trim().isEmpty) {
                 return 'Please enter your occupation';
               }
               return null;
@@ -90,12 +92,11 @@ class ProfileStepTwoWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          //Institution
           TextFormField(
-            controller: institutionController,
+            controller: widget.institutionController,
             decoration: _inputDecoration('Institution / Company'),
             validator: (val) {
-              if (val == null || val.isEmpty) {
+              if (val == null || val.trim().isEmpty) {
                 return 'Please enter current Institution';
               }
               return null;
@@ -116,7 +117,7 @@ class ProfileStepTwoWidget extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: isLoading ? null : onBack,
+                    onPressed: widget.isLoading ? null : widget.onBack,
                     child: const Text(
                       'Back',
                       style: TextStyle(
@@ -140,14 +141,15 @@ class ProfileStepTwoWidget extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    onPressed: isLoading
+                    onPressed: widget.isLoading
                         ? null
                         : () {
-                      if (_formKey.currentState!.validate()) {
-                        onSubmit();
+                      if (_formKey.currentState != null &&
+                          _formKey.currentState!.validate()) {
+                        widget.onSubmit();
                       }
                     },
-                    child: isLoading
+                    child: widget.isLoading
                         ? const SizedBox(
                       height: 22,
                       width: 22,

@@ -10,13 +10,13 @@ class ProfileStepOneWidget extends StatelessWidget {
 
   static final _formKey = GlobalKey<FormState>();
 
-  const ProfileStepOneWidget(
-      this.usernameController,
-      this.phoneController,
-      this.nidController,
-      this.selectedRole,
-      this.onRoleChanged,
-      this.onNext, {
+  const ProfileStepOneWidget({
+      required this.usernameController,
+      required this.phoneController,
+      required this.nidController,
+      required this.selectedRole,
+      required this.onRoleChanged,
+      required this.onNext,
         super.key,
       });
 

@@ -28,7 +28,7 @@ class _RentCardState extends State<RentCard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PropertyDetailsPage(),
+            builder: (context) => PropertyDetailsPage(),
           ),
         );
       },
