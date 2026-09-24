@@ -72,7 +72,6 @@ class _HomePageState extends State<HomePage> {
 
                 Row(
                   children: [
-                    // SORT
                     Expanded(
                       child: Container(
                         height: 48,
@@ -108,9 +107,6 @@ class _HomePageState extends State<HomePage> {
                                         : selectedSort == 'Price: High → Low'
                                         ? 'High → Low'
                                         : selectedSort,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                   // textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       fontSize: 11,
                                       color: Colors.black87,
@@ -146,8 +142,6 @@ class _HomePageState extends State<HomePage> {
                     ),
 
                     const SizedBox(width: 8),
-
-                    // LOCATION
                     Expanded(
                       child: GestureDetector(
                         onTap: () async {
