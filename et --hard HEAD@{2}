@@ -1,0 +1,35 @@
+[33m8834172[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/shweta[m[33m)[m HEAD@{0}: rebase (finish): returning to refs/heads/master
+[33m8834172[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/shweta[m[33m)[m HEAD@{1}: rebase (pick): work in profile setup page
+[33m4ad7d44[m HEAD@{2}: rebase (pick): work in profile setup page
+[33m5bc9d53[m HEAD@{3}: rebase (start): checkout origin/shweta
+[33ma98a275[m HEAD@{4}: commit: work in profile setup page
+[33m627ce94[m HEAD@{5}: commit: work in profile setup page
+[33m13a0b09[m HEAD@{6}: pull origin bijoy: Merge made by the 'ort' strategy.
+[33m31ffac5[m HEAD@{7}: commit: update in sign up page
+[33me09d6b0[m HEAD@{8}: commit: update profile setup page
+[33m8ab389d[m HEAD@{9}: commit: update profile setup page
+[33md0de1f9[m HEAD@{10}: commit: update profile setup page
+[33m0173bb5[m HEAD@{11}: commit: update in sign up page
+[33m6abca4b[m HEAD@{12}: commit: update in sign up page
+[33m7f96fd7[m HEAD@{13}: commit: changes in sign up page
+[33me5fd707[m HEAD@{14}: commit: changes in sign up page
+[33m30c0dff[m HEAD@{15}: commit: update in sign up page
+[33mb478703[m HEAD@{16}: commit: update in sign up page
+[33ma190fea[m HEAD@{17}: commit (merge): Merge remote-tracking branch 'origin/shweta'
+[33m49d24a0[m HEAD@{18}: commit: update in sign up page
+[33mdaaa578[m HEAD@{19}: commit: initial commit: setup RentEase project
+[33m00ccf52[m HEAD@{20}: reword 427a26e5f9545306c02260e9b8ad9ff426988d0c by Android Studio Git plugin
+[33m427a26e[m HEAD@{21}: commit: initial commit: setup RentEase project
+[33m9b81e44[m HEAD@{22}: commit: initial commit: setup RentEase project
+[33mdd3a415[m HEAD@{23}: commit: initial commit: setup RentEase project
+[33m423fd52[m HEAD@{24}: commit: initial commit: setup RentEase project
+[33m946a798[m HEAD@{25}: commit (merge): Merge remote-tracking branch 'origin/master'
+[33mefaffa7[m HEAD@{26}: commit: initial commit: setup RentEase project
+[33m3a70104[m HEAD@{27}: commit: initial commit: setup RentEase project
+[33m58999be[m HEAD@{28}: merge origin/master: Merge made by the 'ort' strategy.
+[33m16a501b[m HEAD@{29}: commit: initial commit: setup RentEase project
+[33m0af2d96[m HEAD@{30}: commit: initial commit: setup RentEase project
+[33mc79f291[m HEAD@{31}: commit (amend): initial commit: setup RentEase project
+[33mf175252[m HEAD@{32}: commit: initial commit: setup RentEase project
+[33mad65635[m HEAD@{33}: commit: initial commit: setup RentEase project
+[33m9b38813[m HEAD@{34}: commit (initial): initial commit: setup RentEase project

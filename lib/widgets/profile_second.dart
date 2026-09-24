@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ProfileStepTwoWidget extends StatefulWidget {
-  final TextEditingController dobController;
   final TextEditingController occupationController;
   final TextEditingController institutionController;
   final String selectedGender;
@@ -10,10 +9,9 @@ class ProfileStepTwoWidget extends StatefulWidget {
   final ValueChanged<String> onMaritalStatusChanged;
   final VoidCallback onBack;
   final VoidCallback onSubmit;
+  final bool isLoading;
 
-  // Positional constructor—clean and simple!
   const ProfileStepTwoWidget(
-      this.dobController,
       this.occupationController,
       this.institutionController,
       this.selectedGender,
@@ -22,6 +20,7 @@ class ProfileStepTwoWidget extends StatefulWidget {
       this.onMaritalStatusChanged,
       this.onBack,
       this.onSubmit, {
+        this.isLoading = false,
         super.key,
       });
 
@@ -30,32 +29,7 @@ class ProfileStepTwoWidget extends StatefulWidget {
 }
 
 class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
-  final _formKey = GlobalKey<FormState>();
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(2000),
-      firstDate: DateTime(1940),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFE86B42),
-              onPrimary: Colors.white,
-              onSurface: Colors.black87,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      widget.dobController.text =
-      "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
-    }
-  }
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +43,7 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 6),
@@ -79,23 +53,9 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
           ),
           const SizedBox(height: 24),
 
-          // Date of Birth
-          TextFormField(
-            controller: widget.dobController,
-            readOnly: true,
-            onTap: () => _selectDate(context),
-            decoration: _inputDecoration(
-                'Date of Birth', Icons.calendar_today_outlined),
-            validator: (val) => val == null || val.isEmpty
-                ? 'Please select your Date of Birth'
-                : null,
-          ),
-          const SizedBox(height: 16),
-
-          // Gender
           DropdownButtonFormField<String>(
-            value: widget.selectedGender,
-            decoration: _inputDecoration('Gender', Icons.wc_outlined),
+            initialValue: widget.selectedGender,
+            decoration: _inputDecoration('Gender'),
             items: const [
               DropdownMenuItem(value: 'Male', child: Text('Male')),
               DropdownMenuItem(value: 'Female', child: Text('Female')),
@@ -107,11 +67,9 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
           ),
           const SizedBox(height: 16),
 
-          // Marital Status
           DropdownButtonFormField<String>(
             initialValue: widget.selectedMaritalStatus,
-            decoration:
-            _inputDecoration('Marital Status', Icons.favorite_outline),
+            decoration: _inputDecoration('Marital Status'),
             items: const [
               DropdownMenuItem(value: 'Single', child: Text('Single')),
               DropdownMenuItem(value: 'Married', child: Text('Married')),
@@ -122,28 +80,31 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
           ),
           const SizedBox(height: 16),
 
-          // Occupation
           TextFormField(
             controller: widget.occupationController,
-            decoration: _inputDecoration('Occupation', Icons.work_outline),
-            validator: (val) => val == null || val.isEmpty
-                ? 'Please enter your occupation'
-                : null,
+            decoration: _inputDecoration('Occupation'),
+            validator: (val) {
+              if (val == null || val.trim().isEmpty) {
+                return 'Please enter your occupation';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
 
-          // Institution / Company
           TextFormField(
             controller: widget.institutionController,
-            decoration: _inputDecoration(
-                'Institution / Company', Icons.business_outlined),
-            validator: (val) => val == null || val.isEmpty
-                ? 'Please enter institution/company'
-                : null,
+            decoration: _inputDecoration('Institution / Company'),
+            validator: (val) {
+              if (val == null || val.trim().isEmpty) {
+                return 'Please enter current Institution';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 32),
 
-          // Buttons Row
+          //Buttons
           Row(
             children: [
               Expanded(
@@ -156,7 +117,7 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: widget.onBack,
+                    onPressed: widget.isLoading ? null : widget.onBack,
                     child: const Text(
                       'Back',
                       style: TextStyle(
@@ -180,12 +141,24 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
                       ),
                       elevation: 0,
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
+                    onPressed: widget.isLoading
+                        ? null
+                        : () {
+                      if (_formKey.currentState != null &&
+                          _formKey.currentState!.validate()) {
                         widget.onSubmit();
                       }
                     },
-                    child: const Text(
+                    child: widget.isLoading
+                        ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
                       'Complete',
                       style: TextStyle(
                         fontSize: 16,
@@ -203,10 +176,9 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon) {
+  InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: Colors.grey.shade600),
       filled: true,
       fillColor: Colors.grey.shade50,
       border: OutlineInputBorder(

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../widgets/profile_first.dart';
 import '../widgets/profile_second.dart';
+import 'home_page.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
-  const ProfileSetupScreen({super.key});
+  final String? selectedRole;
+
+  const ProfileSetupScreen({
+    super.key,
+    this.selectedRole,
+  });
 
   @override
   State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
@@ -12,52 +21,122 @@ class ProfileSetupScreen extends StatefulWidget {
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final PageController _pageController = PageController();
   int _currentStep = 0;
+  bool _isLoading = false;
 
-  // Controllers
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController nidController = TextEditingController();
-  final TextEditingController dobController = TextEditingController();
-  final TextEditingController occupationController = TextEditingController();
-  final TextEditingController institutionController = TextEditingController();
+  late String _selectedRole;
 
-  // Dropdowns
-  String selectedRole = 'Tenant';
-  String selectedGender = 'Male';
-  String selectedMaritalStatus = 'Single';
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _nidController = TextEditingController();
+  final TextEditingController _occupationController = TextEditingController();
+  final TextEditingController _institutionController = TextEditingController();
+  String _selectedGender = 'Male';
+  String _selectedMaritalStatus = 'Single';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = widget.selectedRole ?? 'Tenant';
+  }
 
   @override
   void dispose() {
     _pageController.dispose();
-    usernameController.dispose();
-    phoneController.dispose();
-    nidController.dispose();
-    dobController.dispose();
-    occupationController.dispose();
-    institutionController.dispose();
+    _usernameController.dispose();
+    _phoneController.dispose();
+    _nidController.dispose();
+    _occupationController.dispose();
+    _institutionController.dispose();
     super.dispose();
   }
 
-  void nextPage() {
+  Future<void> _handleProfileSubmit() async {
+    debugPrint('Complete Button Tapped');
+
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    debugPrint('Current User: ${currentUser?.uid}');
+
+    if (currentUser == null) {
+      debugPrint('[ERROR] User is NULL! Aborting submit. ');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: No active user session.')),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      debugPrint('Writing to Firestore');
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .set({
+        'fullName': _usernameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'nidNumber': _nidController.text.trim(),
+        'role': _selectedRole,
+        'gender': _selectedGender,
+        'maritalStatus': _selectedMaritalStatus,
+        'occupation': _occupationController.text.trim(),
+        'institution': _institutionController.text.trim(),
+        'isProfileComplete': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      debugPrint('Firestore Write Successful');
+
+      if (!mounted) {
+        debugPrint('Widget is no longer mounted');
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile setup completed!')),
+      );
+
+      debugPrint('Executing Navigation to HomePage');
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ),
+            (route) => false,
+      );
+
+      debugPrint('Navigation Command Sent');
+
+    } catch (e, stackTrace) {
+      debugPrint('Navigation error $e');
+      debugPrint(stackTrace.toString());
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save profile: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _nextPage() {
     _pageController.nextPage(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }
 
-  void previousPage() {
+  void _previousPage() {
     _pageController.previousPage(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-    );
-  }
-
-  void submitProfile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile setup completed successfully!'),
-        backgroundColor: Color(0xFFE86B42),
-      ),
     );
   }
 
@@ -66,116 +145,48 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-        centerTitle: true,
         title: const Text(
           'Profile Setup',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: _currentStep > 0
+            ? IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: _previousPage,
+        )
+            : null,
       ),
-      body: Column(
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        onPageChanged: (index) {
+          setState(() => _currentStep = index);
+        },
         children: [
-          // Step Progress Bar
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildProgressStep(
-                    stepNumber: 1,
-                    title: 'Account',
-                    isActive: _currentStep >= 0,
-                  ),
-                ),
-                Container(
-                  width: 32,
-                  height: 2,
-                  color: _currentStep >= 1
-                      ? const Color(0xFFE86B42)
-                      : Colors.grey.shade200,
-                ),
-                Expanded(
-                  child: _buildProgressStep(
-                    stepNumber: 2,
-                    title: 'Personal',
-                    isActive: _currentStep >= 1,
-                  ),
-                ),
-              ],
-            ),
+          ProfileStepOneWidget(
+            usernameController: _usernameController,
+            phoneController: _phoneController,
+            nidController: _nidController,
+            selectedRole: _selectedRole,
+            onRoleChanged: (val) => setState(() => _selectedRole = val),
+            onNext: _nextPage,
           ),
-
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              onPageChanged: (index) => setState(() => _currentStep = index),
-              children: [
-                // Instantiating with positional order (no labels, no 'required')
-                ProfileStepOneWidget(
-                  usernameController,
-                  phoneController,
-                  nidController,
-                  selectedRole,
-                      (val) => setState(() => selectedRole = val),
-                  nextPage,
-                ),
-                ProfileStepTwoWidget(
-                  dobController,
-                  occupationController,
-                  institutionController,
-                  selectedGender,
-                      (val) => setState(() => selectedGender = val),
-                  selectedMaritalStatus,
-                      (val) => setState(() => selectedMaritalStatus = val),
-                  previousPage,
-                  submitProfile,
-                ),
-              ],
-            ),
+          ProfileStepTwoWidget(
+            _occupationController,
+            _institutionController,
+            _selectedGender,
+                (val) => setState(() => _selectedGender = val),
+            _selectedMaritalStatus,
+                (val) => setState(() => _selectedMaritalStatus = val),
+            _previousPage,
+            _handleProfileSubmit,
+            isLoading: _isLoading,
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildProgressStep({
-    required int stepNumber,
-    required String title,
-    required bool isActive,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 12,
-          backgroundColor:
-          isActive ? const Color(0xFFE86B42) : Colors.grey.shade300,
-          child: Text(
-            '$stepNumber',
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: isActive ? Colors.black87 : Colors.grey.shade400,
-          ),
-        ),
-      ],
     );
   }
 }

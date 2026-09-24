@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ProfileStepOneWidget extends StatefulWidget {
+class ProfileStepOneWidget extends StatelessWidget {
   final TextEditingController usernameController;
   final TextEditingController phoneController;
   final TextEditingController nidController;
@@ -8,22 +8,17 @@ class ProfileStepOneWidget extends StatefulWidget {
   final ValueChanged<String> onRoleChanged;
   final VoidCallback onNext;
 
-  const ProfileStepOneWidget(
-      this.usernameController,
-      this.phoneController,
-      this.nidController,
-      this.selectedRole,
-      this.onRoleChanged,
-      this.onNext, {
+  static final _formKey = GlobalKey<FormState>();
+
+  const ProfileStepOneWidget({
+      required this.usernameController,
+      required this.phoneController,
+      required this.nidController,
+      required this.selectedRole,
+      required this.onRoleChanged,
+      required this.onNext,
         super.key,
       });
-
-  @override
-  State<ProfileStepOneWidget> createState() => _ProfileStepOneWidgetState();
-}
-
-class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,54 +42,62 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
           ),
           const SizedBox(height: 24),
 
-          // Username
+          //Username
           TextFormField(
-            controller: widget.usernameController,
-            decoration: _inputDecoration('Username', Icons.person_outline),
-            validator: (val) =>
-            val == null || val.isEmpty ? 'Please enter a username' : null,
+            controller: usernameController,
+            decoration: _inputDecoration('Username'),
+            validator: (val) {
+              if (val == null || val.isEmpty) {
+                return 'Please enter a username';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
 
-          // Primary Role
+          //Role
           DropdownButtonFormField<String>(
-            initialValue: widget.selectedRole,
-            decoration: _inputDecoration('Primary Role', Icons.badge_outlined),
+            initialValue: selectedRole,
+            decoration: _inputDecoration('Primary Role'),
             items: const [
               DropdownMenuItem(value: 'Tenant', child: Text('Tenant')),
               DropdownMenuItem(value: 'Landlord', child: Text('Landlord')),
             ],
             onChanged: (val) {
-              if (val != null) widget.onRoleChanged(val);
+              if (val != null) onRoleChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          // Contact Number
+          //Contact Number
           TextFormField(
-            controller: widget.phoneController,
+            controller: phoneController,
             keyboardType: TextInputType.phone,
-            decoration:
-            _inputDecoration('Contact Number', Icons.phone_outlined),
-            validator: (val) => val == null || val.isEmpty
-                ? 'Please enter your phone number'
-                : null,
+            decoration: _inputDecoration('Contact Number'),
+            validator: (val) {
+              if (val == null || val.isEmpty) {
+                return 'Please enter your phone number';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
 
-          // NID Number
+          //NID Number
           TextFormField(
-            controller: widget.nidController,
+            controller: nidController,
             keyboardType: TextInputType.number,
-            decoration:
-            _inputDecoration('NID Number', Icons.credit_card_outlined),
-            validator: (val) => val == null || val.isEmpty
-                ? 'Please enter your NID number'
-                : null,
+            decoration: _inputDecoration('NID Number'),
+            validator: (val) {
+              if (val == null || val.isEmpty) {
+                return 'Please enter your NID number';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: 32),
 
-          // Next Button
+          //Next Button
           SizedBox(
             height: 52,
             child: ElevatedButton(
@@ -103,11 +106,10 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                
               ),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  widget.onNext();
+                  onNext();
                 }
               },
               child: const Text(
@@ -125,10 +127,9 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon) {
+  InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: Colors.grey.shade600),
       filled: true,
       fillColor: Colors.grey.shade50,
       border: OutlineInputBorder(
