@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ProfileStepTwoWidget extends StatefulWidget {
+class ProfileStepTwoWidget extends StatelessWidget {
   final TextEditingController occupationController;
   final TextEditingController institutionController;
   final String selectedGender;
@@ -9,6 +9,9 @@ class ProfileStepTwoWidget extends StatefulWidget {
   final ValueChanged<String> onMaritalStatusChanged;
   final VoidCallback onBack;
   final VoidCallback onSubmit;
+  final bool isLoading;
+
+  static final _formKey = GlobalKey<FormState>();
 
   const ProfileStepTwoWidget(
       this.occupationController,
@@ -19,15 +22,9 @@ class ProfileStepTwoWidget extends StatefulWidget {
       this.onMaritalStatusChanged,
       this.onBack,
       this.onSubmit, {
+        this.isLoading = false,
         super.key,
       });
-
-  @override
-  State<ProfileStepTwoWidget> createState() => _ProfileStepTwoWidgetState();
-}
-
-class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +48,9 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
           ),
           const SizedBox(height: 24),
 
-          // Gender
+          //Gender
           DropdownButtonFormField<String>(
-            initialValue: widget.selectedGender,
+            initialValue: selectedGender,
             decoration: _inputDecoration('Gender'),
             items: const [
               DropdownMenuItem(value: 'Male', child: Text('Male')),
@@ -61,58 +58,52 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
               DropdownMenuItem(value: 'Other', child: Text('Other')),
             ],
             onChanged: (val) {
-              if (val != null)
-                widget.onGenderChanged(val);
+              if (val != null) onGenderChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          // Marital Status
+          //Marital Status
           DropdownButtonFormField<String>(
-            initialValue: widget.selectedMaritalStatus,
-            decoration:
-            _inputDecoration('Marital Status'),
+            initialValue: selectedMaritalStatus,
+            decoration: _inputDecoration('Marital Status'),
             items: const [
               DropdownMenuItem(value: 'Single', child: Text('Single')),
               DropdownMenuItem(value: 'Married', child: Text('Married')),
             ],
             onChanged: (val) {
-              if (val != null)
-                widget.onMaritalStatusChanged(val);
+              if (val != null) onMaritalStatusChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          // Occupation
+          //Occupation
           TextFormField(
-            controller: widget.occupationController,
+            controller: occupationController,
             decoration: _inputDecoration('Occupation'),
             validator: (val) {
-              if(val == null || val.isEmpty){
-                return 'Please enter your occupation' ;
-              } else{
-                return null;
+              if (val == null || val.isEmpty) {
+                return 'Please enter your occupation';
               }
+              return null;
             },
           ),
           const SizedBox(height: 16),
 
-          // Institution
+          //Institution
           TextFormField(
-            controller: widget.institutionController,
-            decoration: _inputDecoration(
-                'Institution / Company'),
+            controller: institutionController,
+            decoration: _inputDecoration('Institution / Company'),
             validator: (val) {
-              if(val == null || val.isEmpty){
-                return 'Please enter current Institution' ;
-              } else{
-                return null;
+              if (val == null || val.isEmpty) {
+                return 'Please enter current Institution';
               }
+              return null;
             },
           ),
           const SizedBox(height: 32),
 
-          // Buttons Row
+          //Buttons
           Row(
             children: [
               Expanded(
@@ -125,7 +116,7 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: widget.onBack,
+                    onPressed: isLoading ? null : onBack,
                     child: const Text(
                       'Back',
                       style: TextStyle(
@@ -149,12 +140,23 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
                       ),
                       elevation: 0,
                     ),
-                    onPressed: () {
+                    onPressed: isLoading
+                        ? null
+                        : () {
                       if (_formKey.currentState!.validate()) {
-                        widget.onSubmit();
+                        onSubmit();
                       }
                     },
-                    child: const Text(
+                    child: isLoading
+                        ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
                       'Complete',
                       style: TextStyle(
                         fontSize: 16,

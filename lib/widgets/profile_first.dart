@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
-class ProfileStepOneWidget extends StatefulWidget {
+class ProfileStepOneWidget extends StatelessWidget {
   final TextEditingController usernameController;
   final TextEditingController phoneController;
   final TextEditingController nidController;
   final String selectedRole;
   final ValueChanged<String> onRoleChanged;
   final VoidCallback onNext;
+
+  static final _formKey = GlobalKey<FormState>();
 
   const ProfileStepOneWidget(
       this.usernameController,
@@ -17,13 +19,6 @@ class ProfileStepOneWidget extends StatefulWidget {
       this.onNext, {
         super.key,
       });
-
-  @override
-  State<ProfileStepOneWidget> createState() => _ProfileStepOneWidgetState();
-}
-
-class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -47,67 +42,62 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
           ),
           const SizedBox(height: 24),
 
-          // Username
+          //Username
           TextFormField(
-            controller: widget.usernameController,
+            controller: usernameController,
             decoration: _inputDecoration('Username'),
             validator: (val) {
-              if(val == null || val.isEmpty){
-                return 'Please enter a username' ;
-              } else{
-                return null;
+              if (val == null || val.isEmpty) {
+                return 'Please enter a username';
               }
+              return null;
             },
           ),
           const SizedBox(height: 16),
 
-          // Primary Role
+          //Role
           DropdownButtonFormField<String>(
-            initialValue: widget.selectedRole,
+            initialValue: selectedRole,
             decoration: _inputDecoration('Primary Role'),
             items: const [
               DropdownMenuItem(value: 'Tenant', child: Text('Tenant')),
               DropdownMenuItem(value: 'Landlord', child: Text('Landlord')),
             ],
             onChanged: (val) {
-              if (val != null) widget.onRoleChanged(val);
+              if (val != null) onRoleChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          // Contact Number
+          //Contact Number
           TextFormField(
-            controller: widget.phoneController,
+            controller: phoneController,
             keyboardType: TextInputType.phone,
-            decoration:
-            _inputDecoration('Contact Number'),
+            decoration: _inputDecoration('Contact Number'),
             validator: (val) {
-              if(val == null || val.isEmpty){
-                return 'Please enter your phone number' ;
-              } else{
-                return null;
+              if (val == null || val.isEmpty) {
+                return 'Please enter your phone number';
               }
-            }
+              return null;
+            },
           ),
           const SizedBox(height: 16),
 
-          // NID Number
+          //NID Number
           TextFormField(
-            controller: widget.nidController,
+            controller: nidController,
             keyboardType: TextInputType.number,
-            decoration:
-            _inputDecoration('NID Number'),
+            decoration: _inputDecoration('NID Number'),
             validator: (val) {
-              if(val == null || val.isEmpty){
-                return 'Please enter your NID number' ;
-              } else{
-                return null;
+              if (val == null || val.isEmpty) {
+                return 'Please enter your NID number';
               }
-            }
+              return null;
+            },
           ),
           const SizedBox(height: 32),
 
-          // Next Button
+          //Next Button
           SizedBox(
             height: 52,
             child: ElevatedButton(
@@ -116,11 +106,10 @@ class _ProfileStepOneWidgetState extends State<ProfileStepOneWidget> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                
               ),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  widget.onNext();
+                  onNext();
                 }
               },
               child: const Text(

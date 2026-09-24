@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/profile_first.dart';
 import '../widgets/profile_second.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -16,14 +18,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController nidController = TextEditingController();
-  final TextEditingController dobController = TextEditingController();
   final TextEditingController occupationController = TextEditingController();
   final TextEditingController institutionController = TextEditingController();
 
-  // Dropdowns
   String selectedRole = 'Tenant';
   String selectedGender = 'Male';
   String selectedMaritalStatus = 'Single';
+
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -31,7 +33,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     usernameController.dispose();
     phoneController.dispose();
     nidController.dispose();
-    dobController.dispose();
     occupationController.dispose();
     institutionController.dispose();
     super.dispose();
@@ -51,13 +52,61 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     );
   }
 
-  void submitProfile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile setup completed successfully!'),
-        backgroundColor: Color(0xFFE86B42),
-      ),
-    );
+  Future<void> submitProfile() async {
+    if (_isSubmitting) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No user found. Please log in again.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'uid': user.uid,
+        'email': user.email ?? '',
+        'username': usernameController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'nid': nidController.text.trim(),
+        'role': selectedRole,
+        'occupation': occupationController.text.trim(),
+        'institution': institutionController.text.trim(),
+        'gender': selectedGender,
+        'maritalStatus': selectedMaritalStatus,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Profile setup completed successfully!'),
+          backgroundColor: Color(0xFFE86B42),
+        ),
+      );
+
+      Navigator.of(context).popUntil((route) => route.isFirst);
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save profile: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+
+    }
   }
 
   @override
@@ -142,9 +191,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Widget _buildProgressStep({
-     required int stepNumber,
-     required String title,
-     required bool isActive,
+    required int stepNumber,
+    required String title,
+    required bool isActive,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
