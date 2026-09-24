@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
-import 'package:project_rent_ease/screens/profile_setup.dart';
+import 'package:project_rent_ease/screens/home_page.dart';
+//import 'package:project_rent_ease/screens/profile_setup.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -27,19 +29,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
 
       setState(() {
-        _isSubmit = true;
+        _isLoading = true;
+        _isSubmit = false;
       });
 
-        // Navigate to ProfileSetup
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileSetupScreen()));
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+        setState(() {
+          _isSubmit = true;
+          _isLoading = false;
+        });
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ),
+        );
+
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? "Account creation failed"),
+          ),
+        );
+      }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,13 +184,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 28),
 
                   ElevatedButton(
-                    onPressed: () {
-                      if(_isLoading){
-                        return null;
-                      } else{
-                        return _submitForm();
-                      }
-                    },
+                    onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor:  Color(0xFFE86B42),
                       foregroundColor: Colors.white,

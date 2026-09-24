@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:project_rent_ease/screens/property_details_page.dart'; // Adjust path to match your folder structure
 
 class RentCard extends StatefulWidget {
   final String title;
@@ -22,47 +23,62 @@ class RentCard extends StatefulWidget {
 class _RentCardState extends State<RentCard> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 156,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              image: DecorationImage(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const PropertyDetailsPage(),
+          ),
+        );
+      },
+      child: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 156,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                image: DecorationImage(
                   image: AssetImage(widget.imagePath),
                   fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
+            Padding(
               padding: const EdgeInsets.only(left: 2.0, right: 6.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 12),
-                  Text(widget.title,
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.title,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF494949),
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
-                      Image(image: AssetImage('assets/icons/location.png'), height: 14, width: 14,),
-                      SizedBox(width: 6),
+                      const Image(
+                        image: AssetImage('assets/icons/location.png'),
+                        height: 14,
+                        width: 14,
+                      ),
+                      const SizedBox(width: 6),
                       Expanded(
-                        child: Text(widget.location,
+                        child: Text(
+                          widget.location,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF848D84),
                           ),
@@ -70,19 +86,21 @@ class _RentCardState extends State<RentCard> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text('৳',
+                      const Text(
+                        '৳',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFFF9834D),
                         ),
                       ),
-                      SizedBox(width: 3),
-                      Text(NumberFormat('#,##,##0', 'en_IN').format(widget.amount),
-                        style: TextStyle(
+                      const SizedBox(width: 3),
+                      Text(
+                        NumberFormat('#,##,##0', 'en_IN').format(widget.amount),
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF383838),
@@ -93,8 +111,8 @@ class _RentCardState extends State<RentCard> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

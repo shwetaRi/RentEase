@@ -5,7 +5,6 @@ class PropertyDetails extends StatelessWidget {
   final String value;
   final String title;
 
-  // Standard constructor (if custom detail types are ever needed)
   const PropertyDetails({
     super.key,
     required this.icon,
@@ -13,7 +12,7 @@ class PropertyDetails extends StatelessWidget {
     required this.title,
   });
 
-  // Fixed Named Constructor for Bedrooms
+
   const PropertyDetails.bedrooms({
     super.key,
     required this.value,

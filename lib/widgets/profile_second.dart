@@ -111,8 +111,6 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
             },
           ),
           const SizedBox(height: 32),
-
-          // Buttons Row
           Row(
             children: [
               Expanded(
@@ -147,11 +145,12 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      elevation: 0,
                     ),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         widget.onSubmit();
+                        Navigator.popUntil(context,
+                         (route) => route.isFirst || route.settings.name == '/property_details');
                       }
                     },
                     child: const Text(
