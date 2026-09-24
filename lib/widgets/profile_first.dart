@@ -8,9 +8,9 @@ class ProfileStepOneWidget extends StatelessWidget {
   final ValueChanged<String> onRoleChanged;
   final VoidCallback onNext;
 
-  static final _formKey = GlobalKey<FormState>();
+   final _formKey = GlobalKey<FormState>();
 
-  const ProfileStepOneWidget({
+    ProfileStepOneWidget({
       required this.usernameController,
       required this.phoneController,
       required this.nidController,
