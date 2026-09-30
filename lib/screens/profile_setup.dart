@@ -57,7 +57,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     debugPrint('Current User: ${currentUser?.uid}');
 
     if (currentUser == null) {
-      debugPrint('[ERROR] User is NULL! Aborting submit. ');
+      debugPrint('User is NULL! Aborting submit. ');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error: No active user session.')),

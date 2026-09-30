@@ -3,7 +3,7 @@ import 'package:project_rent_ease/widgets/property_counter.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
 
 class PropertyInfoPage extends StatefulWidget {
-  final String selectedCategory; // Stores 'Family', 'Office', etc.
+  final String selectedCategory;
 
   const PropertyInfoPage({
     super.key,
@@ -35,7 +35,7 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
           fontWeight: FontWeight.w700,
           fontSize: 20,
           color: Color(0xFF000000),
-        ), // TextStyle
+        ),
       ),
       ),
       body: SafeArea(

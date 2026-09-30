@@ -101,7 +101,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                    //Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
