@@ -5,8 +5,10 @@ import 'package:project_rent_ease/widgets/property_details.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
+  final Map<String, dynamic>? propertyData;
   const PropertyDetailsPage({
     super.key,
+    this.propertyData,
   });
 
   @override

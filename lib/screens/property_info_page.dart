@@ -3,7 +3,7 @@ import 'package:project_rent_ease/widgets/property_counter.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
 import 'package:project_rent_ease/screens/location_contact_page.dart';
 class PropertyInfoPage extends StatefulWidget {
-  final String selectedCategory; // Stores 'Family', 'Office', etc.
+  final String selectedCategory;
 
   const PropertyInfoPage({
     super.key,
@@ -70,7 +70,7 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomePage(),
+          builder: (context) => LocationContactPage(propertyData: propertyData),
         ),
       );
     }
@@ -80,6 +80,8 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Property Information',
           style: TextStyle(
@@ -398,8 +400,24 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: const BoxDecoration(
+                            color: Colors.black,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                      ),
                       ElevatedButton(
                         onPressed: _validateAndSubmit,
                         style: ElevatedButton.styleFrom(
