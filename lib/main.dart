@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:project_rent_ease/screens/dashboard_page.dart';
+import 'package:project_rent_ease/screens/favorite_page.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
 import 'package:project_rent_ease/screens/map_picker_page.dart';
 import 'package:project_rent_ease/screens/profile_setup.dart';
