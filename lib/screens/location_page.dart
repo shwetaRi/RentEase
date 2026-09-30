@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LocationPage extends StatefulWidget {
   const LocationPage({super.key});
 
-  // Centralized static lists accessible across all screens
+
   static const List<String> divisions = [
     'Dhaka',
     'Chattogram',
@@ -20,12 +20,18 @@ class LocationPage extends StatefulWidget {
     'Gazipur',
     'Narayanganj',
     'Tangail',
-    'Chattogram',
-    'Cumilla',
+    'Faridpur',
+    'Jessore',
     'Noakhali',
-    'Rajshahi',
+    'Rangpur',
     'Khulna',
-    'Sylhet',
+    'pabna',
+    'Kushtia',
+    'Bandarban',
+    'Habiganj',
+
+
+
   ];
 
   static const List<String> areas = [
@@ -33,6 +39,12 @@ class LocationPage extends StatefulWidget {
     'Badda',
     'Mirpur',
     'Banani',
+    'Mohammedpur',
+    'Wari',
+    'Maguhbar',
+    'Jatrabari',
+    'Shajahanpur',
+    'Malibugh'
   ];
 
   @override
