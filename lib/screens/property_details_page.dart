@@ -5,7 +5,9 @@ import 'package:project_rent_ease/widgets/property_details.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
-  const PropertyDetailsPage({super.key});
+  const PropertyDetailsPage({
+    super.key,
+  });
 
   @override
   State<PropertyDetailsPage> createState() => _PropertyState();

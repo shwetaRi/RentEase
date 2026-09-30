@@ -1,177 +1,188 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'personal_information.dart';
+import 'settings.dart';
+import 'login_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  Future<void> _logout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log Out'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Log Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    await FirebaseAuth.instance.signOut();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      return const Scaffold(
+        body: Center(child: Text('User not logged in.')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'Profile',
+          'My Profile',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined, color: Colors.black),
-            onPressed: () {
-              // Profile change logic
-            },
-          ),
-        ],
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            // User Header Info
-            Center(
-              child: Column(
-                children: [
-                  Stack(
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return const Center(child: Text('User profile data not found.'));
+          }
+
+          final userData = snapshot.data!.data() as Map<String, dynamic>;
+          final String username = userData['username'] ?? 'User Name';
+          final String email = userData['email'] ?? currentUser.email ?? '';
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  username,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: Column(
                     children: [
-                      const CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Color(0xFFFFF0EC),
-                        child: Icon(
-                          Icons.person,
-                          size: 50,
-                          color: Color(0xFFE86B42),
-                        ),
+                      _buildOptionTile(
+                        icon: Icons.person_outline,
+                        title: 'Personal Information',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PersonalInformationPage(userData: userData),
+                            ),
+                          );
+                        },
                       ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFE86B42),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-                        ),
+                      const SizedBox(height: 8), // Gap spacing
+                      _buildOptionTile(
+                        icon: Icons.settings_outlined,
+                        title: 'Settings',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SettingsPage(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Shweta Biswas',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            // Options List
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                children: [
-                  _buildProfileOption(
-                    icon: Icons.person_outline,
-                    title: 'Personal Information',
-                    onTap: () {},
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildProfileOption(
-                    icon: Icons.verified_user_outlined,
-                    title: 'Verification & Documents',
-                    onTap: () {},
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildProfileOption(
-                    icon: Icons.payment_outlined,
-                    title: 'Payment Methods',
-                    onTap: () {},
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildProfileOption(
-                    icon: Icons.settings_outlined,
-                    title: 'Settings',
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 24),
 
-            // Logout Option
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: _buildProfileOption(
-                icon: Icons.logout,
-                title: 'Log Out',
-                color: Colors.red,
-                showArrow: false, // Hides chevron for logout
-                onTap: () {},
-              ),
+                //Logout
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: _buildOptionTile(
+                    icon: Icons.logout,
+                    title: 'Log Out',
+                    textColor: Colors.red,
+                    iconColor: Colors.red,
+                    onTap: () => _logout(context),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-
-
-  Widget _buildProfileOption({
+  Widget _buildOptionTile({
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color color = Colors.black87,
-    bool showArrow = true,
+    Color textColor = Colors.black87,
+    Color iconColor = const Color(0xFFE86B42),
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: color,
-                ),
-              ),
-            ),
-            if (showArrow)
-              const Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: Colors.grey,
-              ),
-          ],
+    return ListTile(
+      leading: Icon(icon, color: iconColor, size: 22),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: textColor,
         ),
       ),
+      trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+      onTap: onTap,
     );
   }
 }
