@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/widgets/property_counter.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
-
+import 'package:project_rent_ease/screens/location_contact_page.dart';
 class PropertyInfoPage extends StatefulWidget {
   final String selectedCategory; // Stores 'Family', 'Office', etc.
 
@@ -37,7 +37,6 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
 
   void _validateAndSubmit() {
     bool isInvalid = roomTotal == 0 ||
-        bathrooms == 0 ||
         _floorLevelController.text.trim().isEmpty ||
         _rentPriceController.text.trim().isEmpty ||
         selectedPeriod == null;
