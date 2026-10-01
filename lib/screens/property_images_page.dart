@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:project_rent_ease/screens/property_details_page.dart';
+import 'package:project_rent_ease/models/property_model.dart';
+import 'package:project_rent_ease/services/property_service.dart';
+import 'package:project_rent_ease/screens/home_page.dart';
 
 class PropertyImagesPage extends StatefulWidget {
   final Map<String, dynamic> propertyData;
@@ -19,6 +21,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
   final List<XFile> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
   bool showError = false;
+  bool isLoading = false;
   String errorMessage = 'Incomplete Information';
 
   Future<void> _pickImages() async {
@@ -62,27 +65,46 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
     });
   }
 
-  void _validateAndPost() {
+  void _validateAndPost() async {
     if (_selectedImages.length < 4) {
       _triggerError('Select at least 4 images');
       return;
     }
 
-    Map<String, dynamic> completePropertyData = {
-      ...widget.propertyData,
-      'images': _selectedImages.map((e) => e.path).toList(),
-    };
+    setState(() {
+      isLoading = true;
+    });
 
-    debugPrint("Final Property Package Ready to Submit: $completePropertyData");
+    try {
+      Map<String, dynamic> completePropertyData = {
+        ...widget.propertyData,
+        'images': _selectedImages.map((e) => e.path).toList(),
+        'createdAt': DateTime.now().toIso8601String(),
+      };
+      await PropertyService().addPropertyWithImages(completePropertyData);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PropertyDetailsPage(
-          propertyData: completePropertyData,
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Property Posted Successfully!'),
+          backgroundColor: Colors.green,
         ),
-      ),
-    );
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+            (route) => false,
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        _triggerError('Failed to post property: $e');
+      }
+    }
   }
 
   @override
@@ -111,7 +133,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Wizard Step Indicators (Identical to earlier screens)
+                          // Wizard Step Indicators
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             child: Row(
@@ -202,7 +224,6 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                           ),
                           const SizedBox(height: 30),
 
-                          // Guidance Text
                           const Text(
                             '• First images will be Thumbnails/Display image.',
                             style: TextStyle(
@@ -224,7 +245,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
 
                           // Photo Picker Box
                           GestureDetector(
-                            onTap: _pickImages,
+                            onTap: isLoading ? null : _pickImages,
                             child: Container(
                               height: 220,
                               width: double.infinity,
@@ -257,7 +278,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: const Text(
-                                      'SELECT ADDITIONAL IMAGES',
+                                      'SELECT IMAGES',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -290,8 +311,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
 
                           const SizedBox(height: 20),
 
-                          // Image Action Buttons
-                          if (_selectedImages.isNotEmpty)
+                          if (_selectedImages.isNotEmpty && !isLoading)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -344,15 +364,13 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                     ),
                   ),
                 ),
-
-                // Bottom Action Buttons
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: isLoading ? null : () => Navigator.pop(context),
                         child: Container(
                           width: 48,
                           height: 48,
@@ -368,7 +386,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: _validateAndPost,
+                        onPressed: isLoading ? null : _validateAndPost,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF00A3E0),
                           foregroundColor: Colors.white,
@@ -377,7 +395,16 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
+                        child: isLoading
+                            ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : const Text(
                           'POST',
                           style: TextStyle(
                             fontSize: 16,
@@ -390,8 +417,6 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                 ),
               ],
             ),
-
-            // Floating Red Error Banner
             if (showError)
               Positioned(
                 bottom: 80,

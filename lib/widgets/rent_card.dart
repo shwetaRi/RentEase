@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project_rent_ease/screens/property_details_page.dart'; // Adjust path to match your folder structure
@@ -7,6 +8,7 @@ class RentCard extends StatefulWidget {
   final String location;
   final int amount;
   final String imagePath;
+  final Map<String, dynamic>? propertyData;
 
   const RentCard({
     super.key,
@@ -14,6 +16,7 @@ class RentCard extends StatefulWidget {
     required this.location,
     required this.amount,
     required this.imagePath,
+    this.propertyData
   });
 
   @override
@@ -21,6 +24,28 @@ class RentCard extends StatefulWidget {
 }
 
 class _RentCardState extends State<RentCard> {
+  Widget _buildCardThumbnail() {
+    List<dynamic>? images = widget.propertyData?['images'];
+
+    if (images != null && images.isNotEmpty) {
+      String path = images.first.toString();
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return Image.network(path, fit: BoxFit.cover);
+      } else if (path.startsWith('assets/')) {
+        return Image.asset(path, fit: BoxFit.cover);
+      } else {
+        return Image.file(File(path), fit: BoxFit.cover);
+      }
+    }
+
+    if (widget.imagePath.startsWith('http://') || widget.imagePath.startsWith('https://')) {
+      return Image.network(widget.imagePath, fit: BoxFit.cover);
+    } else if (widget.imagePath.startsWith('assets/')) {
+      return Image.asset(widget.imagePath, fit: BoxFit.cover);
+    } else {
+      return Image.file(File(widget.imagePath), fit: BoxFit.cover);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -28,7 +53,14 @@ class _RentCardState extends State<RentCard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PropertyDetailsPage(),
+            builder: (context) => PropertyDetailsPage(
+              propertyData: widget.propertyData ?? {
+                'category': widget.title,
+                'fullAddress': widget.location,
+                'rentPrice': widget.amount.toString(),
+                'images': widget.imagePath.isNotEmpty ? [widget.imagePath] : [],
+              },
+            ),
           ),
         );
       },
@@ -42,10 +74,10 @@ class _RentCardState extends State<RentCard> {
               width: double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
-                image: DecorationImage(
-                  image: AssetImage(widget.imagePath),
-                  fit: BoxFit.cover,
-                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: _buildCardThumbnail(),
               ),
             ),
             Padding(
