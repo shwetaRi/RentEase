@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/widgets/property_counter.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
+import 'package:project_rent_ease/screens/landlord_dashboard_page.dart';
 import 'package:project_rent_ease/screens/location_contact_page.dart';
 class PropertyInfoPage extends StatefulWidget {
   final String selectedCategory; // Stores 'Family', 'Office', etc.
@@ -67,11 +68,12 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
 
       debugPrint("Property Data Collected: $propertyData");
 
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomePage(),
+          builder: (context) => const LandlordDashboardPage(),
         ),
+            (route) => false,
       );
     }
   }
