@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project_rent_ease/screens/location_page.dart';
 import 'package:project_rent_ease/screens/map_picker_page.dart';
 import 'package:project_rent_ease/screens/property_details_page.dart';
-
+import 'package:project_rent_ease/screens/property_images_page.dart';
 class LocationContactPage extends StatefulWidget {
   final Map<String, dynamic> propertyData;
 
@@ -76,7 +76,7 @@ class _LocationContactPageState extends State<LocationContactPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PropertyDetailsPage(
+          builder: (context) => PropertyImagesPage(
             propertyData: completePropertyData,
           ),
         ),
