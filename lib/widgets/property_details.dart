@@ -19,14 +19,14 @@ class PropertyDetails extends StatelessWidget {
   })  : icon = Icons.king_bed_outlined,
         title = 'Bedrooms';
 
-  // Fixed Named Constructor for Bathrooms
+
   const PropertyDetails.bathrooms({
     super.key,
     required this.value,
   })  : icon = Icons.bathtub_outlined,
         title = 'Bathrooms';
 
-  // Fixed Named Constructor for Area
+
   const PropertyDetails.area({
     super.key,
     required this.value,

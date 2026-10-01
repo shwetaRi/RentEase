@@ -2,19 +2,61 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/widgets/property_image.dart';
 import 'package:project_rent_ease/widgets/property_details.dart';
+import 'package:project_rent_ease/models/favorite_store.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
-  const PropertyDetailsPage({super.key});
+  final String title;
+  final String location;
+  final int amount;
+  final String imagePath;
+
+  const PropertyDetailsPage({
+    super.key,
+    this.title = 'Flat Rent Home',
+    this.location = 'Road # 12, Block G, Dhanmondi',
+    this.amount = 15000,
+    this.imagePath = 'assets/images/card_image_4.png',
+  });
 
   @override
   State<PropertyDetailsPage> createState() => _PropertyState();
 }
 
 class _PropertyState extends State<PropertyDetailsPage> {
-  bool isFavourite=false;
+  final FavoriteStore _store = FavoriteStore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _store.addListener(_updateFavorite);
+  }
+
+  @override
+  void dispose() {
+    _store.removeListener(_updateFavorite);
+    super.dispose();
+  }
+
+  void _updateFavorite() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _toggleFavorite() {
+    _store.toggleFavorite(
+      FavoriteProperty(
+        title: widget.title,
+        location: widget.location,
+        amount: widget.amount,
+        imagePath: widget.imagePath,
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
+    final bool isFavourite = _store.isFavorite(widget.title);
     return  Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -98,11 +140,9 @@ class _PropertyState extends State<PropertyDetailsPage> {
                            ],
                          ),
                       GestureDetector(
-                        onTap: (){
-                          setState(() {
-                            isFavourite =!isFavourite;
-                          });
-                        },
+                        onTap: _toggleFavorite,
+
+
                         child: Container(
                           width: 33,
                           height: 30,
