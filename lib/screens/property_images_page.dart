@@ -433,12 +433,16 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
                       children: [
                         const Icon(Icons.error_outline, color: Colors.white, size: 24),
                         const SizedBox(width: 10),
-                        Text(
-                          errorMessage,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            errorMessage,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

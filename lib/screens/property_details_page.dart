@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/widgets/property_details.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
+import 'package:project_rent_ease/screens/dashboard_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
   final Map<String, dynamic>? propertyData;
@@ -18,6 +21,62 @@ class PropertyDetailsPage extends StatefulWidget {
 
 class _PropertyState extends State<PropertyDetailsPage> {
   bool isFavourite = false;
+  bool _isBooking = false;
+
+  Future<void> _handleBookNow() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+      return;
+    }
+
+    setState(() {
+      _isBooking = true;
+    });
+
+    try {
+      // 1. Save application record to Firestore
+      await FirebaseFirestore.instance.collection('bookings').add({
+        'applicantId': user.uid,
+        'applicantEmail': user.email ?? '',
+        'propertyData': widget.propertyData ?? {},
+        'status': 'Pending',
+        'appliedAt': DateTime.now().toIso8601String(),
+      });
+
+      // 2. 1-second delay
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (!mounted) return;
+
+      setState(() {
+        _isBooking = false;
+      });
+
+      // 3. Navigate immediately to DashboardPage
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isBooking = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to book property: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildImageWidget(
       String path, {
         double? width,
@@ -53,6 +112,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final String category = widget.propertyData?['category'] ?? 'Flat';
@@ -90,7 +150,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                 children: [
                   imagePaths.isNotEmpty
                       ? _buildImageWidget(
-              imagePaths.first.toString(),
+                    imagePaths.first.toString(),
                     width: double.infinity,
                     height: 436,
                     fit: BoxFit.cover,
@@ -247,7 +307,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: _buildImageWidget(
-                                        path.toString(),
+                                      path.toString(),
                                       height: 75,
                                       fit: BoxFit.cover,
                                     ),
@@ -345,15 +405,17 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: const Text(
+                  onPressed: _isBooking ? null : _handleBookNow,
+                  child: _isBooking
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Text(
                     'Book Now',
                     style: TextStyle(
                       fontSize: 18,
