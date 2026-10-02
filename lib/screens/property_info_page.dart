@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/widgets/property_counter.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
 import 'package:project_rent_ease/screens/landlord_dashboard_page.dart';
@@ -56,6 +57,9 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
       });
     } else {
       Map<String, dynamic> propertyData = {
+        'landlordId': FirebaseAuth.instance.currentUser?.uid,
+
+
         'category': widget.selectedCategory,
         'rooms': roomTotal,
         'bathrooms': bathrooms,

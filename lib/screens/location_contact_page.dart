@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/screens/location_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/screens/map_picker_page.dart';
 import 'package:project_rent_ease/screens/property_details_page.dart';
 import 'package:project_rent_ease/screens/property_images_page.dart';
@@ -59,6 +60,7 @@ class _LocationContactPageState extends State<LocationContactPage> {
 
       Map<String, dynamic> completePropertyData = {
         ...widget.propertyData,
+        'landlordId': FirebaseAuth.instance.currentUser?.uid,
         'division': selectedDivision,
         'district': selectedDistrict,
         'area': selectedArea,
