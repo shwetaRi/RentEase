@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/screens/dashboard_page.dart';
+import 'package:project_rent_ease/screens/profile_view.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -65,7 +66,15 @@ class BottomNavBar extends StatelessWidget {
           ),
 
           GestureDetector(
-            onTap: () => onTap(3),
+            onTap: () {
+              onTap(3);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProfilePage(),
+                ),
+              );
+            },
             child: Image(
               image: AssetImage(
                 currentIndex == 3

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:project_rent_ease/screens/signUp.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:project_rent_ease/screens/signUp.dart';
+import 'package:project_rent_ease/screens/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,55 +14,91 @@ class _LoginPageState extends State<LoginPage> {
   bool isLandlord = true;
   bool rememberMe = false;
   bool obscurePassword = true;
+  bool isLoading = false;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
- Future<void>signIn() async {
+  Future<void> signIn() async {
+    final String email = emailController.text.trim();
+    final String password = passwordController.text;
 
-   try {
-     await FirebaseAuth.instance.signInWithEmailAndPassword(email:emailController.text.trim(), password: passwordController.text,);
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill in all fields.")),
+      );
+      return;
+    }
 
+    setState(() => isLoading = true);
 
-   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text("Login successful"),
-     ),
-   );
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-   } on FirebaseAuthException catch (e) {
-     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message
-      ?? "Login failed"),
-     ),
-     );
-   }
+      if (!mounted) return;
 
- }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login successful!")),
+      );
 
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+            (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message ?? "Login failed.")),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("An error occurred: $e")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               const SizedBox(height: 15),
-
               Row(
                 children: [
-
                   CircleAvatar(
                     backgroundColor: Colors.grey.shade200,
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back),
-                      onPressed: () {},
+                      onPressed: () {
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        }
+                      },
                     ),
                   ),
-
                   const Expanded(
                     child: Center(
                       child: Text(
@@ -73,14 +110,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 40),
-
                 ],
               ),
-
               const SizedBox(height: 35),
-
               const Center(
                 child: Text(
                   "Welcome Back",
@@ -90,9 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
-
               const Center(
                 child: Text(
                   "Stay connected by signing in with your email\nand password to access your account.",
@@ -102,9 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 35),
-
               const Center(
                 child: Text(
                   "Choose your role",
@@ -113,12 +142,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 15),
-
               Row(
                 children: [
-
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
@@ -137,20 +163,15 @@ class _LoginPageState extends State<LoginPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-
                             Icon(Icons.key),
-
                             SizedBox(width: 8),
-
                             Text("Landlord"),
                           ],
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 10),
-
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
@@ -169,34 +190,27 @@ class _LoginPageState extends State<LoginPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-
                             Icon(Icons.person_outline),
-
                             SizedBox(width: 8),
-
                             Text("Tenant"),
                           ],
                         ),
                       ),
                     ),
                   ),
-
                 ],
               ),
-
               const SizedBox(height: 30),
-
               const Text(
                 "Email Address",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               TextField(
                 controller: emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: "Your Email",
                   filled: true,
@@ -207,18 +221,14 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 25),
-
               const Text(
                 "Password",
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                 ),
               ),
-
               const SizedBox(height: 8),
-
               TextField(
                 obscureText: obscurePassword,
                 controller: passwordController,
@@ -244,35 +254,26 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 18),
-
               Row(
                 children: [
-
                   Checkbox(
                     value: rememberMe,
                     onChanged: (value) {
                       setState(() {
-                        rememberMe = value!;
+                        rememberMe = value ?? false;
                       });
                     },
                   ),
-
                   const Text("Remember me"),
-
                   const Spacer(),
-
                   TextButton(
                     onPressed: () {},
                     child: const Text("Forgot Password?"),
                   ),
-
                 ],
               ),
-
               const SizedBox(height: 20),
-
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -284,8 +285,17 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  onPressed: signIn ,
-                  child: const Text(
+                  onPressed: isLoading ? null : signIn,
+                  child: isLoading
+                      ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Text(
                     "Sign In",
                     style: TextStyle(
                       fontSize: 18,
@@ -293,30 +303,25 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   const Text("Don't have an account? "),
-
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpScreen(),
+                        ),
                       );
                     },
                     child: const Text("Sign Up"),
                   )
-
                 ],
               ),
-
               const SizedBox(height: 20),
-
             ],
           ),
         ),

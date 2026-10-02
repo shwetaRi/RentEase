@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
-import 'package:project_rent_ease/screens/home_page.dart';
-//import 'package:project_rent_ease/screens/profile_setup.dart';
+import 'package:project_rent_ease/screens/profile_setup.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -29,19 +28,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  Future<void> _submitForm() async {
+  Future<void> _submitForm() async{
     if (formKey.currentState!.validate()) {
       FocusScope.of(context).unfocus();
 
       setState(() {
-        _isLoading = true;
-        _isSubmit = false;
+        _isSubmit = true;
       });
-
       try {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        UserCredential userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
-          password: _passwordController.text,
+          password: _passwordController.text.trim(),
         );
 
         setState(() {
@@ -49,26 +47,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _isLoading = false;
         });
 
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const HomePage(),
+            builder: (context) => ProfileSetupScreen(),
           ),
         );
-
       } on FirebaseAuthException catch (e) {
+
         setState(() {
           _isLoading = false;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.message ?? "Account creation failed"),
+            content: Text(e.message ?? 'Registration failed'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      } catch (e) {
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.redAccent,
           ),
         );
       }
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,7 +101,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Header
+                    //Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -118,7 +134,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 32),
 
-                  // 4. Email
+                    //Email
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -136,7 +152,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 28),
 
-                  // 5. Password
+                   //Password
                   TextFormField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
@@ -184,7 +200,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 28),
 
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _submitForm,
+                    onPressed: _isLoading ? null : () => _submitForm(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor:  Color(0xFFE86B42),
                       foregroundColor: Colors.white,

@@ -1,11 +1,12 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:project_rent_ease/widgets/property_image.dart';
 import 'package:project_rent_ease/widgets/property_details.dart';
 import 'package:project_rent_ease/models/favorite_store.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
+  final Map<String, dynamic>? propertyData;
   final String title;
   final String location;
   final int amount;
@@ -13,10 +14,7 @@ class PropertyDetailsPage extends StatefulWidget {
 
   const PropertyDetailsPage({
     super.key,
-    this.title = 'Flat Rent Home',
-    this.location = 'Road # 12, Block G, Dhanmondi',
-    this.amount = 15000,
-    this.imagePath = 'assets/images/card_image_4.png',
+    this.propertyData,
   });
 
   @override
@@ -24,6 +22,42 @@ class PropertyDetailsPage extends StatefulWidget {
 }
 
 class _PropertyState extends State<PropertyDetailsPage> {
+  bool isFavourite = false;
+  Widget _buildImageWidget(
+      String path, {
+        double? width,
+        double? height,
+        BoxFit fit = BoxFit.cover,
+      }) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: width,
+          height: height,
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.broken_image, color: Colors.grey),
+        ),
+      );
+    } else if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    } else {
+      return Image.file(
+        File(path),
+        width: width,
+        height: height,
+        fit: fit,
+      );
+    }
+  }
   final FavoriteStore _store = FavoriteStore.instance;
 
   @override
@@ -56,6 +90,32 @@ class _PropertyState extends State<PropertyDetailsPage> {
   }
   @override
   Widget build(BuildContext context) {
+    final String category = widget.propertyData?['category'] ?? 'Flat';
+    final String title = '$category Rent Home';
+
+    final String address = widget.propertyData?['fullAddress'] ??
+        widget.propertyData?['area'] ??
+        "Road # 12, Block G, Dhanmondi";
+
+    final String rentPrice = widget.propertyData?['rentPrice'] != null
+        ? 'TK ${widget.propertyData!['rentPrice']}'
+        : 'TK 15,000';
+
+    final String rentPeriod = widget.propertyData?['rentPeriod'] != null
+        ? '/ ${widget.propertyData!['rentPeriod']}'
+        : '/ month';
+
+    final String rooms = widget.propertyData?['rooms']?.toString() ?? '0';
+    final String bathrooms = widget.propertyData?['bathrooms']?.toString() ?? '0';
+    final String areaSqFt = widget.propertyData?['squareFeet'] != null &&
+        widget.propertyData!['squareFeet'].toString().isNotEmpty
+        ? widget.propertyData!['squareFeet'].toString()
+        : '0';
+
+    final List<dynamic> imagePaths =
+        (widget.propertyData?['images'] as List<dynamic>?) ?? [];
+
+    return Scaffold(
     final bool isFavourite = _store.isFavorite(widget.title);
     return  Scaffold(
       body: SafeArea(
@@ -116,6 +176,64 @@ class _PropertyState extends State<PropertyDetailsPage> {
                                style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
+                              color: Color(0xFF000000),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 23,
+                                color: Color(0xFF000000),
+                              ),
+                              const SizedBox(width: 2),
+                              Expanded(
+                                child: Text(
+                                  address,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isFavourite = !isFavourite;
+                        });
+                      },
+                      child: Container(
+                        width: 33,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: isFavourite ? Colors.red.shade50 : Colors.grey.shade100,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavourite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavourite ? Colors.red : Colors.grey.shade600,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Photos Section Header
                               color: Color(0xFF000000)
                                ),
                              ),

@@ -4,7 +4,7 @@ import 'package:project_rent_ease/screens/home_page.dart';
 import 'package:project_rent_ease/screens/landlord_dashboard_page.dart';
 import 'package:project_rent_ease/screens/location_contact_page.dart';
 class PropertyInfoPage extends StatefulWidget {
-  final String selectedCategory; // Stores 'Family', 'Office', etc.
+  final String selectedCategory;
 
   const PropertyInfoPage({
     super.key,
@@ -68,12 +68,11 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
 
       debugPrint("Property Data Collected: $propertyData");
 
-      Navigator.pushAndRemoveUntil(
+      Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const LandlordDashboardPage(),
+          builder: (context) => LocationContactPage(propertyData: propertyData),
         ),
-            (route) => false,
       );
     }
   }
@@ -82,6 +81,8 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
         title: const Text(
           'Property Information',
           style: TextStyle(

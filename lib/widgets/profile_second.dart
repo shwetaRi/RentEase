@@ -9,6 +9,7 @@ class ProfileStepTwoWidget extends StatefulWidget {
   final ValueChanged<String> onMaritalStatusChanged;
   final VoidCallback onBack;
   final VoidCallback onSubmit;
+  final bool isLoading;
 
   const ProfileStepTwoWidget(
       this.occupationController,
@@ -19,6 +20,7 @@ class ProfileStepTwoWidget extends StatefulWidget {
       this.onMaritalStatusChanged,
       this.onBack,
       this.onSubmit, {
+        this.isLoading = false,
         super.key,
       });
 
@@ -27,7 +29,7 @@ class ProfileStepTwoWidget extends StatefulWidget {
 }
 
 class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,6 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
           ),
           const SizedBox(height: 24),
 
-          // Gender
           DropdownButtonFormField<String>(
             initialValue: widget.selectedGender,
             decoration: _inputDecoration('Gender'),
@@ -61,56 +62,49 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
               DropdownMenuItem(value: 'Other', child: Text('Other')),
             ],
             onChanged: (val) {
-              if (val != null)
-                widget.onGenderChanged(val);
+              if (val != null) widget.onGenderChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          // Marital Status
           DropdownButtonFormField<String>(
             initialValue: widget.selectedMaritalStatus,
-            decoration:
-            _inputDecoration('Marital Status'),
+            decoration: _inputDecoration('Marital Status'),
             items: const [
               DropdownMenuItem(value: 'Single', child: Text('Single')),
               DropdownMenuItem(value: 'Married', child: Text('Married')),
             ],
             onChanged: (val) {
-              if (val != null)
-                widget.onMaritalStatusChanged(val);
+              if (val != null) widget.onMaritalStatusChanged(val);
             },
           ),
           const SizedBox(height: 16),
 
-          // Occupation
           TextFormField(
             controller: widget.occupationController,
             decoration: _inputDecoration('Occupation'),
             validator: (val) {
-              if(val == null || val.isEmpty){
-                return 'Please enter your occupation' ;
-              } else{
-                return null;
+              if (val == null || val.trim().isEmpty) {
+                return 'Please enter your occupation';
               }
+              return null;
             },
           ),
           const SizedBox(height: 16),
 
-          // Institution
           TextFormField(
             controller: widget.institutionController,
-            decoration: _inputDecoration(
-                'Institution / Company'),
+            decoration: _inputDecoration('Institution / Company'),
             validator: (val) {
-              if(val == null || val.isEmpty){
-                return 'Please enter current Institution' ;
-              } else{
-                return null;
+              if (val == null || val.trim().isEmpty) {
+                return 'Please enter current Institution';
               }
+              return null;
             },
           ),
           const SizedBox(height: 32),
+
+          //Buttons
           Row(
             children: [
               Expanded(
@@ -123,7 +117,7 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: widget.onBack,
+                    onPressed: widget.isLoading ? null : widget.onBack,
                     child: const Text(
                       'Back',
                       style: TextStyle(
@@ -145,15 +139,26 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
+                      elevation: 0,
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
+                    onPressed: widget.isLoading
+                        ? null
+                        : () {
+                      if (_formKey.currentState != null &&
+                          _formKey.currentState!.validate()) {
                         widget.onSubmit();
-                        Navigator.popUntil(context,
-                         (route) => route.isFirst || route.settings.name == '/property_details');
                       }
                     },
-                    child: const Text(
+                    child: widget.isLoading
+                        ? const SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text(
                       'Complete',
                       style: TextStyle(
                         fontSize: 16,

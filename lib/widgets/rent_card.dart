@@ -1,4 +1,5 @@
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project_rent_ease/screens/property_details_page.dart';
@@ -52,6 +53,28 @@ class _RentCardState extends State<RentCard> {
     );
   }
 
+  Widget _buildCardThumbnail() {
+    List<dynamic>? images = widget.propertyData?['images'];
+
+    if (images != null && images.isNotEmpty) {
+      String path = images.first.toString();
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return Image.network(path, fit: BoxFit.cover);
+      } else if (path.startsWith('assets/')) {
+        return Image.asset(path, fit: BoxFit.cover);
+      } else {
+        return Image.file(File(path), fit: BoxFit.cover);
+      }
+    }
+
+    if (widget.imagePath.startsWith('http://') || widget.imagePath.startsWith('https://')) {
+      return Image.network(widget.imagePath, fit: BoxFit.cover);
+    } else if (widget.imagePath.startsWith('assets/')) {
+      return Image.asset(widget.imagePath, fit: BoxFit.cover);
+    } else {
+      return Image.file(File(widget.imagePath), fit: BoxFit.cover);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final bool isFavorite = _store.isFavorite(widget.title);
@@ -62,6 +85,14 @@ class _RentCardState extends State<RentCard> {
           context,
           MaterialPageRoute(
             builder: (context) => PropertyDetailsPage(
+              propertyData: widget.propertyData ?? {
+                'category': widget.title,
+                'fullAddress': widget.location,
+                'rentPrice': widget.amount.toString(),
+                'images': widget.imagePath.isNotEmpty ? [widget.imagePath] : [],
+              },
+            ),
+            builder: (context) => PropertyDetailsPage(
               title: widget.title,
               location: widget.location,
               amount: widget.amount,
@@ -70,6 +101,20 @@ class _RentCardState extends State<RentCard> {
           ),
         );
       },
+      child: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 156,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: _buildCardThumbnail(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
