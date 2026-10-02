@@ -1,5 +1,6 @@
 
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:project_rent_ease/screens/property_details_page.dart';
@@ -10,6 +11,7 @@ class RentCard extends StatefulWidget {
   final String location;
   final int amount;
   final String imagePath;
+  final Map<String, dynamic>? propertyData;
 
   const RentCard({
     super.key,
@@ -17,6 +19,7 @@ class RentCard extends StatefulWidget {
     required this.location,
     required this.amount,
     required this.imagePath,
+    this.propertyData,
   });
 
   @override
@@ -39,7 +42,9 @@ class _RentCardState extends State<RentCard> {
   }
 
   void _updateFavorite() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _toggleFavorite() {
@@ -54,67 +59,84 @@ class _RentCardState extends State<RentCard> {
   }
 
   Widget _buildCardThumbnail() {
-    List<dynamic>? images = widget.propertyData?['images'];
+    final images = widget.propertyData?['images'];
 
-    if (images != null && images.isNotEmpty) {
-      String path = images.first.toString();
-      if (path.startsWith('http://') || path.startsWith('https://')) {
-        return Image.network(path, fit: BoxFit.cover);
-      } else if (path.startsWith('assets/')) {
-        return Image.asset(path, fit: BoxFit.cover);
-      } else {
-        return Image.file(File(path), fit: BoxFit.cover);
-      }
+    String path = widget.imagePath;
+
+    if (images is List && images.isNotEmpty) {
+      path = images.first.toString();
     }
 
-    if (widget.imagePath.startsWith('http://') || widget.imagePath.startsWith('https://')) {
-      return Image.network(widget.imagePath, fit: BoxFit.cover);
-    } else if (widget.imagePath.startsWith('assets/')) {
-      return Image.asset(widget.imagePath, fit: BoxFit.cover);
-    } else {
-      return Image.file(File(widget.imagePath), fit: BoxFit.cover);
+    if (path.startsWith('http://') ||
+        path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return _imagePlaceholder();
+        },
+      );
     }
+
+    if (path.startsWith('assets/')) {
+      return Image.asset(
+        path,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return _imagePlaceholder();
+        },
+      );
+    }
+
+    return Image.file(
+      File(path),
+      fit: BoxFit.cover,
+      width: double.infinity,
+      errorBuilder: (context, error, stackTrace) {
+        return _imagePlaceholder();
+      },
+    );
   }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      color: Colors.grey.shade200,
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.home_outlined,
+        size: 45,
+        color: Colors.grey,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isFavorite = _store.isFavorite(widget.title);
 
     return GestureDetector(
       onTap: () {
+        final Map<String, dynamic> data =
+            widget.propertyData ?? {
+              'category': widget.title,
+              'fullAddress': widget.location,
+              'rentPrice': widget.amount.toString(),
+              'images': widget.imagePath.isNotEmpty
+                  ? [widget.imagePath]
+                  : <String>[],
+            };
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PropertyDetailsPage(
-              propertyData: widget.propertyData ?? {
-                'category': widget.title,
-                'fullAddress': widget.location,
-                'rentPrice': widget.amount.toString(),
-                'images': widget.imagePath.isNotEmpty ? [widget.imagePath] : [],
-              },
-            ),
-            builder: (context) => PropertyDetailsPage(
-              title: widget.title,
-              location: widget.location,
-              amount: widget.amount,
-              imagePath: widget.imagePath,
+              propertyData: data,
             ),
           ),
         );
       },
-      child: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 156,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: _buildCardThumbnail(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -126,13 +148,12 @@ class _RentCardState extends State<RentCard> {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
-                  image: DecorationImage(
-                    image: AssetImage(widget.imagePath),
-                    fit: BoxFit.cover,
-                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: _buildCardThumbnail(),
                 ),
               ),
-
               Positioned(
                 top: 8,
                 right: 8,
@@ -163,7 +184,6 @@ class _RentCardState extends State<RentCard> {
               ),
             ],
           ),
-
           Padding(
             padding: const EdgeInsets.only(left: 2, right: 6),
             child: Column(
