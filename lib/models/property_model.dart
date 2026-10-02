@@ -1,5 +1,6 @@
 class PropertyModel {
   final String? id;
+  final String landlordId;
   final String category;
   final int rooms;
   final int bathrooms;
@@ -23,6 +24,7 @@ class PropertyModel {
 
   PropertyModel({
     this.id,
+    required this.landlordId,
     required this.category,
     required this.rooms,
     required this.bathrooms,
@@ -47,6 +49,7 @@ class PropertyModel {
 
   Map<String, dynamic> toMap() {
     return {
+      'landlordId': landlordId,
       'category': category,
       'rooms': rooms,
       'bathrooms': bathrooms,
@@ -73,6 +76,7 @@ class PropertyModel {
   factory PropertyModel.fromMap(Map<String, dynamic> map, String docId) {
     return PropertyModel(
       id: docId,
+      landlordId: map['landlordId'] ?? '',
       category: map['category'] ?? 'Flat',
       rooms: map['rooms'] ?? 0,
       bathrooms: map['bathrooms'] ?? 0,

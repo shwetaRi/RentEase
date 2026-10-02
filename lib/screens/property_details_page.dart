@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/widgets/property_details.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
+import 'package:project_rent_ease/screens/dashboard_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
   final Map<String, dynamic>? propertyData;
@@ -20,54 +21,62 @@ class PropertyDetailsPage extends StatefulWidget {
 
 class _PropertyState extends State<PropertyDetailsPage> {
   bool isFavourite = false;
-  bool isBooking =false;
-  Future<void> _bookProperty() async {
+  bool _isBooking = false;
+
+  Future<void> _handleBookNow() async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('বুকিং করতে প্রথমে লগইন করুন')),
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
       return;
     }
 
     setState(() {
-      isBooking = true;
+      _isBooking = true;
     });
 
     try {
+      // 1. Save application record to Firestore
       await FirebaseFirestore.instance.collection('bookings').add({
-        'propertyId': widget.propertyData?['id'] ?? '',
-        'landlordId': widget.propertyData?['landlordId'] ?? '',
-        'tenantId': user.uid, // টেনেন্টের User ID
-        'title': widget.propertyData?['category'] != null
-            ? '${widget.propertyData!['category']} Rent Home'
-            : 'Rent Home',
-        'rentPrice': widget.propertyData?['rentPrice'] ?? '15000',
-        'status': 'Pending', // প্রাথমিক স্ট্যাটাস
-        'createdAt': FieldValue.serverTimestamp(),
+        'applicantId': user.uid,
+        'applicantEmail': user.email ?? '',
+        'propertyData': widget.propertyData ?? {},
+        'status': 'Pending',
+        'appliedAt': DateTime.now().toIso8601String(),
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('বুকিং রিকোয়েস্ট পাঠানো হয়েছে!')),
-        );
-        Navigator.pop(context);
-      }
+      // 2. 1-second delay
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (!mounted) return;
+
+      setState(() {
+        _isBooking = false;
+      });
+
+      // 3. Navigate immediately to DashboardPage
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+      );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('ভুল হয়েছে: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
         setState(() {
-          isBooking = false;
+          _isBooking = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to book property: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
+
   Widget _buildImageWidget(
       String path, {
         double? width,
@@ -140,7 +149,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                 children: [
                   imagePaths.isNotEmpty
                       ? _buildImageWidget(
-                    imagePaths.first.toString(),
+              imagePaths.first.toString(),
                     width: double.infinity,
                     height: 436,
                     fit: BoxFit.cover,
@@ -297,7 +306,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: _buildImageWidget(
-                                      path.toString(),
+                                        path.toString(),
                                       height: 75,
                                       fit: BoxFit.cover,
                                     ),
@@ -395,17 +404,15 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                  onPressed: isBooking ? null : _bookProperty,
-                  child: isBooking
-                      ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : const Text(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
                     'Book Now',
                     style: TextStyle(
                       fontSize: 18,
@@ -413,7 +420,6 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       color: Color(0xFFFFFFFF),
                     ),
                   ),
-
                 ),
                 const SizedBox(width: 8),
               ],

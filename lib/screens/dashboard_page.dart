@@ -34,7 +34,7 @@ class _DashboardPageState extends State<DashboardPage>
         elevation: 0,
         automaticallyImplyLeading: true,
         title: const Text(
-          'Rent Ease Dashboard',
+          'Tenant Dashboard',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
