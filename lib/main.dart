@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:project_rent_ease/screens/dashboard_page.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
 import 'package:project_rent_ease/screens/location_contact_page.dart';
+import 'package:project_rent_ease/screens/personal_information.dart';
+import 'package:project_rent_ease/screens/profile_view.dart';
 import 'package:project_rent_ease/screens/property_details_page.dart';
 import 'package:project_rent_ease/screens/property_info_page.dart';
 import 'package:project_rent_ease/screens/select_category.dart';
@@ -33,7 +35,7 @@ class RentEase extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: SelectCategory(),
+      home: ProfilePage(),
     );
   }
 }
