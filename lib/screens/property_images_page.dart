@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:project_rent_ease/models/property_model.dart';
+import 'package:project_rent_ease/screens/landlord_dashboard_page.dart';
 import 'package:project_rent_ease/services/property_service.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
 
@@ -95,7 +96,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
 
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(builder: (context) => const LandlordDashboardPage()),
             (route) => false,
       );
     } catch (e) {

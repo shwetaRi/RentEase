@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,13 +8,11 @@ class PropertyService {
   final CollectionReference _propertiesRef =
   FirebaseFirestore.instance.collection('properties');
 
-  // Exact bucket from google-services.json without 'gs://'
-  final FirebaseStorage _storage = FirebaseStorage.instanceFor(
-    bucket: 'rentease-87f1e.firebasestorage.app',
-  );
+  // Let Firebase configure the bucket automatically from firebase_options.dart
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   Future<List<String>> uploadImages(List<String> localFilePaths, String docId) async {
-    List<String> imagePathsOrUrls = [];
+    List<String> downloadUrls = [];
 
     for (int i = 0; i < localFilePaths.length; i++) {
       File file = File(localFilePaths[i]);
@@ -24,26 +21,21 @@ class PropertyService {
         continue;
       }
 
-      try {
-        String fileName = 'property_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
-        Reference ref = _storage.ref().child('properties/$docId/$fileName');
+      String fileName = 'property_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
+      Reference ref = _storage.ref().child('properties/$docId/$fileName');
 
-        UploadTask uploadTask = ref.putFile(file);
-        TaskSnapshot snapshot = await uploadTask;
+      UploadTask uploadTask = ref.putFile(file);
+      TaskSnapshot snapshot = await uploadTask;
 
-        if (snapshot.state == TaskState.success) {
-          String downloadUrl = await snapshot.ref.getDownloadURL();
-          imagePathsOrUrls.add(downloadUrl);
-        } else {
-          imagePathsOrUrls.add(file.path);
-        }
-      } catch (e) {
-        debugPrint("Firebase Storage Upload Error ($e). Using local path for fallback.");
-        imagePathsOrUrls.add(file.path);
+      if (snapshot.state == TaskState.success) {
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+        downloadUrls.add(downloadUrl);
+      } else {
+        throw Exception("Failed to upload image $i to Firebase Storage");
       }
     }
 
-    return imagePathsOrUrls;
+    return downloadUrls;
   }
 
   Future<void> addPropertyWithImages(Map<String, dynamic> rawPropertyData) async {
@@ -53,10 +45,12 @@ class PropertyService {
     String currentUserId = FirebaseAuth.instance.currentUser?.uid ?? 'guest_landlord';
 
     List<String> localPaths = List<String>.from(rawPropertyData['images'] ?? []);
-    List<String> finalImageUrls = await uploadImages(localPaths, newDocId);
+
+    // Now forces actual web URLs. No local paths will pollute the database.
+    List<String> firestoreImageUrls = await uploadImages(localPaths, newDocId);
 
     Map<String, dynamic> finalData = Map<String, dynamic>.from(rawPropertyData);
-    finalData['images'] = finalImageUrls;
+    finalData['images'] = firestoreImageUrls;
     finalData['landlordId'] = currentUserId;
 
     PropertyModel property = PropertyModel.fromMap(finalData, newDocId);

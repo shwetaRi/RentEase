@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:project_rent_ease/widgets/category.dart';
 import 'package:project_rent_ease/screens/favorite_page.dart';
 import 'package:project_rent_ease/widgets/rent_card.dart';
 import 'package:project_rent_ease/widgets/bottom_nav_bar.dart';
@@ -7,7 +6,6 @@ import 'package:project_rent_ease/screens/filter_page.dart';
 import 'package:project_rent_ease/screens/location_page.dart';
 import 'package:project_rent_ease/models/property_model.dart';
 import 'package:project_rent_ease/services/property_service.dart';
-import 'package:project_rent_ease/screens/select_category.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -32,24 +30,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Temporary Floating Action Button to post properties repeatedly
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF00A3E0),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SelectCategory()),
-          );
-        },
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Property',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/screens/select_category.dart';
-import 'package:project_rent_ease/screens/favorite_page.dart';
+import 'package:project_rent_ease/screens/profile_view.dart';
+import 'package:project_rent_ease/screens/applicant_profile_page.dart';
+import 'package:project_rent_ease/widgets/rent_card.dart';
 
 class LandlordDashboardPage extends StatefulWidget {
   const LandlordDashboardPage({super.key});
@@ -14,30 +16,6 @@ class LandlordDashboardPage extends StatefulWidget {
 
 class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
   final Color orange = const Color(0xFFF9834D);
-  final Color navColor = const Color(0xFFF0E3E7);
-
-  // Status (Accept / Reject) Update Function
-  Future<void> _updateBookingStatus(
-      BuildContext context, String docId, String newStatus) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('bookings')
-          .doc(docId)
-          .update({'status': newStatus});
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Status updated to $newStatus')),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update status: $e')),
-        );
-      }
-    }
-  }
 
   Widget _emptyState({
     required IconData icon,
@@ -79,7 +57,6 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
     );
   }
 
-  // Your Property Tab (Fetches properties uploaded by landlord)
   Widget _yourPropertyTab() {
     final currentLandlordId = FirebaseAuth.instance.currentUser?.uid;
 
@@ -108,28 +85,36 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
 
         final propertyDocs = snapshot.data!.docs;
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(12),
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.7,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 12,
+          ),
           itemCount: propertyDocs.length,
           itemBuilder: (context, index) {
-            final property =
-            propertyDocs[index].data() as Map<String, dynamic>;
-            final category = property['category'] ?? 'Flat';
-            final rentPrice = property['rentPrice'] ?? '0';
+            final propData = propertyDocs[index].data() as Map<String, dynamic>;
+            final category = propData['category'] ?? 'Flat';
+            final location =
+                propData['fullAddress'] ?? propData['area'] ?? 'Location';
+            final amount =
+                int.tryParse(propData['rentPrice']?.toString() ?? '0') ?? 0;
 
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.home, color: Color(0xFFF9834D)),
-                title: Text(
-                  '$category Rent Home',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text('Rent: TK $rentPrice'),
-              ),
+            final List<dynamic> images = propData['images'] ?? [];
+            final String imagePath = images.isNotEmpty
+                ? images.first.toString()
+                : 'assets/images/card_image_1.png';
+
+            return RentCard(
+              title: '$category Rent Home',
+              location: location,
+              amount: amount,
+              imagePath: imagePath,
+              propertyData: propData,
+              showFavoriteIcon: false,
+              isLandlordView: true,
             );
           },
         );
@@ -137,7 +122,6 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
     );
   }
 
-  // Applicants Tab (Fetches booking requests for this landlord)
   Widget _applicantsTab() {
     final currentLandlordId = FirebaseAuth.instance.currentUser?.uid;
 
@@ -148,6 +132,7 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('bookings')
+          .where('landlordId', isEqualTo: currentLandlordId)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -164,8 +149,7 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
           return _emptyState(
             icon: Icons.people_outline,
             title: 'No Applicants Yet',
-            message:
-            'People who apply for your properties will appear here.',
+            message: 'People who apply for your properties will appear here.',
           );
         }
 
@@ -179,217 +163,114 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
             final booking = bookingDoc.data() as Map<String, dynamic>;
             final docId = bookingDoc.id;
 
-            final tenantId = booking['tenantId'] ?? 'Unknown Tenant';
-            final title = booking['title'] ?? 'Rent Home';
-            final rentPrice = booking['rentPrice'] ?? '15000';
+            final applicantId = booking['applicantId'] ?? 'Unknown Tenant';
+            final propertyData = booking['propertyData'] as Map<String, dynamic>? ?? {};
+
+            final title = propertyData['category'] != null
+                ? '${propertyData['category']} Rent Home'
+                : 'Rent Home';
+            final rentPrice = propertyData['rentPrice'] ?? '0';
             final status = booking['status'] ?? 'Pending';
 
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+            return GestureDetector(
+              onTap: () {
+                // If it is pending, let the landlord view the profile and decide.
+                if (status == 'Pending') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ApplicantProfilePage(
+                        applicantId: applicantId,
+                        bookingId: docId,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.person_outline,
-                              size: 18, color: Colors.grey),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              'Tenant User ID: $tenantId',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black87,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Rent: TK $rentPrice',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFF9834D),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (status == 'Pending')
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onPressed: () =>
-                                _updateBookingStatus(context, docId, 'Accepted'),
-                            icon: const Icon(Icons.check,
-                                size: 18, color: Colors.white),
-                            label: const Text(
-                              'Accept',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onPressed: () =>
-                                _updateBookingStatus(context, docId, 'Rejected'),
-                            icon: const Icon(Icons.close,
-                                size: 18, color: Colors.white),
-                            label: const Text(
-                              'Reject',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      )
-                    else
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          'Status: $status',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: status == 'Accepted'
-                                ? Colors.green
-                                : Colors.red,
-                          ),
+                  );
+                } else {
+                  // Inform them it's already processed
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('This application is already $status')),
+                  );
+                }
+              },
+              child: Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
-                  ],
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.person_outline,
+                                size: 18, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                'Applicant ID: $applicantId',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Rent: TK $rentPrice',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFF9834D),
+                            ),
+                          ),
+                          Text(
+                            status,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: status == 'Accepted'
+                                  ? Colors.green
+                                  : status == 'Rejected'
+                                  ? Colors.red
+                                  : Colors.orange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
           },
         );
       },
-    );
-  }
-
-  Widget _bottomNavigationBar() {
-    return Container(
-      height: 76,
-      color: navColor,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          GestureDetector(
-            onTap: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-            },
-            child: Image.asset(
-              'assets/icons/home.png',
-              height: 24,
-              width: 24,
-            ),
-          ),
-          Icon(
-            Icons.dashboard,
-            size: 26,
-            color: orange,
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SelectCategory(),
-                ),
-              );
-            },
-            child: Container(
-              height: 52,
-              width: 52,
-              decoration: BoxDecoration(
-                color: orange,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: orange.withOpacity(0.25),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 34,
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const FavoritePage(),
-                ),
-              );
-            },
-            child: Image.asset(
-              'assets/icons/love.png',
-              height: 24,
-              width: 24,
-            ),
-          ),
-          // Profile
-          GestureDetector(
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Landlord profile coming soon.',
-                  ),
-                ),
-              );
-            },
-            child: Image.asset(
-              'assets/icons/profile.png',
-              height: 24,
-              width: 24,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -411,6 +292,25 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
               color: Color(0xFF383838),
             ),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfilePage(),
+                    ),
+                  );
+                },
+                child: const CircleAvatar(
+                  backgroundColor: Color(0xFFE6DBD7),
+                  backgroundImage: AssetImage('assets/images/profile.png'),
+                ),
+              ),
+            ),
+          ],
           bottom: TabBar(
             labelColor: orange,
             unselectedLabelColor: Colors.grey,
@@ -431,8 +331,19 @@ class _LandlordDashboardPageState extends State<LandlordDashboardPage> {
           ],
         ),
 
-        // Bottom Navigation
-        bottomNavigationBar: _bottomNavigationBar(),
+        // Floating '+' Button to add property
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: orange,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SelectCategory(),
+              ),
+            );
+          },
+          child: const Icon(Icons.add, color: Colors.white, size: 30),
+        ),
       ),
     );
   }

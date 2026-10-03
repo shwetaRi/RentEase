@@ -4,15 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/widgets/property_details.dart';
+import 'package:project_rent_ease/models/favorite_store.dart';
 import 'package:project_rent_ease/screens/login_page.dart';
 import 'package:project_rent_ease/screens/dashboard_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
+  final String title;
+  final String location;
+  final int amount;
+  final String imagePath;
   final Map<String, dynamic>? propertyData;
+  final bool isLandlordView;
+  final bool isAppliedView;
 
   const PropertyDetailsPage({
     super.key,
+    this.title = 'Flat Rent Home',
+    this.location = 'Road # 12, Block G, Dhanmondi',
+    this.amount = 15000,
+    this.imagePath = 'assets/images/card_image_4.png',
     this.propertyData,
+    this.isLandlordView = false,
+    this.isAppliedView = false,
   });
 
   @override
@@ -20,8 +33,42 @@ class PropertyDetailsPage extends StatefulWidget {
 }
 
 class _PropertyState extends State<PropertyDetailsPage> {
-  bool isFavourite = false;
+  final FavoriteStore _store = FavoriteStore.instance;
   bool _isBooking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _store.addListener(_updateFavorite);
+  }
+
+  @override
+  void dispose() {
+    _store.removeListener(_updateFavorite);
+    super.dispose();
+  }
+
+  void _updateFavorite() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _toggleFavorite(
+      String currentTitle,
+      String currentLocation,
+      int currentAmount,
+      String currentImagePath,
+      ) {
+    _store.toggleFavorite(
+      FavoriteProperty(
+        title: currentTitle,
+        location: currentLocation,
+        amount: currentAmount,
+        imagePath: currentImagePath,
+      ),
+    );
+  }
 
   Future<void> _handleBookNow() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -39,16 +86,21 @@ class _PropertyState extends State<PropertyDetailsPage> {
     });
 
     try {
-      // 1. Save application record to Firestore
+      final String propertyLandlordId = widget.propertyData?['landlordId'] ?? '';
       await FirebaseFirestore.instance.collection('bookings').add({
         'applicantId': user.uid,
         'applicantEmail': user.email ?? '',
-        'propertyData': widget.propertyData ?? {},
+        'landlordId': propertyLandlordId,
+        'propertyData': widget.propertyData ?? {
+          'category': 'Flat',
+          'rentPrice': widget.amount.toString(),
+          'fullAddress': widget.location,
+          'images': [widget.imagePath],
+        },
         'status': 'Pending',
         'appliedAt': DateTime.now().toIso8601String(),
       });
 
-      // 2. 1-second delay
       await Future.delayed(const Duration(seconds: 1));
 
       if (!mounted) return;
@@ -57,7 +109,6 @@ class _PropertyState extends State<PropertyDetailsPage> {
         _isBooking = false;
       });
 
-      // 3. Navigate immediately to DashboardPage
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const DashboardPage()),
@@ -112,32 +163,39 @@ class _PropertyState extends State<PropertyDetailsPage> {
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final String category = widget.propertyData?['category'] ?? 'Flat';
-    final String title = '$category Rent Home';
+    final String title = widget.propertyData != null
+        ? '$category Rent Home'
+        : widget.title;
 
     final String address = widget.propertyData?['fullAddress'] ??
         widget.propertyData?['area'] ??
-        "Road # 12, Block G, Dhanmondi";
+        widget.location;
 
-    final String rentPrice = widget.propertyData?['rentPrice'] != null
-        ? 'TK ${widget.propertyData!['rentPrice']}'
-        : 'TK 15,000';
+    final int priceAmount = widget.propertyData?['rentPrice'] != null
+        ? int.tryParse(widget.propertyData!['rentPrice'].toString()) ?? widget.amount
+        : widget.amount;
+
+    final String rentPrice = 'TK $priceAmount';
 
     final String rentPeriod = widget.propertyData?['rentPeriod'] != null
         ? '/ ${widget.propertyData!['rentPeriod']}'
         : '/ month';
 
-    final String rooms = widget.propertyData?['rooms']?.toString() ?? '0';
-    final String bathrooms = widget.propertyData?['bathrooms']?.toString() ?? '0';
+    final String rooms = widget.propertyData?['rooms']?.toString() ?? '3';
+    final String bathrooms = widget.propertyData?['bathrooms']?.toString() ?? '2';
     final String areaSqFt = widget.propertyData?['squareFeet'] != null &&
         widget.propertyData!['squareFeet'].toString().isNotEmpty
         ? widget.propertyData!['squareFeet'].toString()
-        : '0';
+        : '1500';
 
     final List<dynamic> imagePaths =
-        (widget.propertyData?['images'] as List<dynamic>?) ?? [];
+        (widget.propertyData?['images'] as List<dynamic>?) ?? [widget.imagePath];
+
+    final bool isFavourite = _store.isFavorite(title);
 
     return Scaffold(
       body: SafeArea(
@@ -149,13 +207,13 @@ class _PropertyState extends State<PropertyDetailsPage> {
                 children: [
                   imagePaths.isNotEmpty
                       ? _buildImageWidget(
-              imagePaths.first.toString(),
+                    imagePaths.first.toString(),
                     width: double.infinity,
                     height: 436,
                     fit: BoxFit.cover,
                   )
-                      : const Image(
-                    image: AssetImage('assets/images/card_image_4.png'),
+                      : Image.asset(
+                    widget.imagePath,
                     width: double.infinity,
                     height: 436,
                     fit: BoxFit.cover,
@@ -192,7 +250,6 @@ class _PropertyState extends State<PropertyDetailsPage> {
               ),
               const SizedBox(height: 8),
 
-              // Title and Location Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 18),
                 child: Row(
@@ -236,26 +293,29 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isFavourite = !isFavourite;
-                        });
-                      },
-                      child: Container(
-                        width: 33,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: isFavourite ? Colors.red.shade50 : Colors.grey.shade100,
-                          shape: BoxShape.circle,
+
+                    if (!widget.isLandlordView)
+                      GestureDetector(
+                        onTap: () => _toggleFavorite(
+                          title,
+                          address,
+                          priceAmount,
+                          imagePaths.isNotEmpty ? imagePaths.first.toString() : widget.imagePath,
                         ),
-                        child: Icon(
-                          isFavourite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavourite ? Colors.red : Colors.grey.shade600,
-                          size: 28,
+                        child: Container(
+                          width: 33,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: isFavourite ? Colors.red.shade50 : Colors.grey.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFavourite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavourite ? Colors.red : Colors.grey.shade600,
+                            size: 28,
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -265,7 +325,6 @@ class _PropertyState extends State<PropertyDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Photos Section Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -306,7 +365,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: _buildImageWidget(
-                                        path.toString(),
+                                      path.toString(),
                                       height: 75,
                                       fit: BoxFit.cover,
                                     ),
@@ -320,7 +379,6 @@ class _PropertyState extends State<PropertyDetailsPage> {
 
                     const SizedBox(height: 10),
 
-                    // Dynamic Property Specs
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -365,7 +423,10 @@ class _PropertyState extends State<PropertyDetailsPage> {
           ),
         ),
       ),
-      bottomSheet: Container(
+      // 3. Hide bottom bar (Book Now) entirely if Landlord
+      bottomSheet: (widget.isLandlordView||widget.isAppliedView)
+          ? null
+          : Container(
         color: const Color(0xFFFFFFFF),
         child: Padding(
           padding: const EdgeInsets.only(left: 12, right: 12, bottom: 20),
@@ -404,15 +465,17 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: const Text(
+                  onPressed: _isBooking ? null : _handleBookNow,
+                  child: _isBooking
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Text(
                     'Book Now',
                     style: TextStyle(
                       fontSize: 18,

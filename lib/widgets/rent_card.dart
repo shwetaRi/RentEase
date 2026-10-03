@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,6 +11,8 @@ class RentCard extends StatefulWidget {
   final int amount;
   final String imagePath;
   final Map<String, dynamic>? propertyData;
+  final bool showFavoriteIcon;
+  final bool isLandlordView; // 1. Added flag to track if viewed by landlord
 
   const RentCard({
     super.key,
@@ -20,6 +21,8 @@ class RentCard extends StatefulWidget {
     required this.amount,
     required this.imagePath,
     this.propertyData,
+    this.showFavoriteIcon = true,
+    this.isLandlordView = false, // Defaults to false for Tenants
   });
 
   @override
@@ -67,8 +70,7 @@ class _RentCardState extends State<RentCard> {
       path = images.first.toString();
     }
 
-    if (path.startsWith('http://') ||
-        path.startsWith('https://')) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
       return Image.network(
         path,
         fit: BoxFit.cover,
@@ -118,8 +120,8 @@ class _RentCardState extends State<RentCard> {
 
     return GestureDetector(
       onTap: () {
-        final Map<String, dynamic> data =
-            widget.propertyData ?? {
+        final Map<String, dynamic> data = widget.propertyData ??
+            {
               'category': widget.title,
               'fullAddress': widget.location,
               'rentPrice': widget.amount.toString(),
@@ -133,6 +135,7 @@ class _RentCardState extends State<RentCard> {
           MaterialPageRoute(
             builder: (context) => PropertyDetailsPage(
               propertyData: data,
+              isLandlordView: widget.isLandlordView, // 2. Pass flag to details page
             ),
           ),
         );
@@ -154,34 +157,33 @@ class _RentCardState extends State<RentCard> {
                   child: _buildCardThumbnail(),
                 ),
               ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Material(
-                  color: Colors.white,
-                  shape: const CircleBorder(),
-                  child: IconButton(
-                    onPressed: _toggleFavorite,
-                    tooltip: isFavorite
-                        ? 'Remove from favorites'
-                        : 'Add to favorites',
-                    icon: Icon(
-                      isFavorite
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: isFavorite
-                          ? const Color(0xFFF9834D)
-                          : Colors.black87,
-                      size: 22,
+              if (widget.showFavoriteIcon)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Material(
+                    color: Colors.white,
+                    shape: const CircleBorder(),
+                    child: IconButton(
+                      onPressed: _toggleFavorite,
+                      tooltip: isFavorite
+                          ? 'Remove from favorites'
+                          : 'Add to favorites',
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite
+                            ? const Color(0xFFF9834D)
+                            : Colors.black87,
+                        size: 22,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 38,
+                        minHeight: 38,
+                      ),
+                      padding: EdgeInsets.zero,
                     ),
-                    constraints: const BoxConstraints(
-                      minWidth: 38,
-                      minHeight: 38,
-                    ),
-                    padding: EdgeInsets.zero,
                   ),
                 ),
-              ),
             ],
           ),
           Padding(
@@ -235,8 +237,7 @@ class _RentCardState extends State<RentCard> {
                     ),
                     const SizedBox(width: 3),
                     Text(
-                      NumberFormat('#,##,##0', 'en_IN')
-                          .format(widget.amount),
+                      NumberFormat('#,##,##0', 'en_IN').format(widget.amount),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
