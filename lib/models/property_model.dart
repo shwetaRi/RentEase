@@ -1,10 +1,9 @@
 class PropertyModel {
-  final String? id;
-  final String landlordId;
+  final String id;
   final String category;
-  final int rooms;
-  final int bathrooms;
-  final int balcony;
+  final String rooms;
+  final String bathrooms;
+  final String balcony;
   final String floorLevel;
   final String squareFeet;
   final String rentPrice;
@@ -19,12 +18,12 @@ class PropertyModel {
   final String road;
   final String house;
   final String fullAddress;
-  final List<String> images;
-  final DateTime createdAt;
+  final String landlordId;
+  final List<String> images; // <--- This holds your image URLs!
+  final String createdAt;
 
   PropertyModel({
-    this.id,
-    required this.landlordId,
+    required this.id,
     required this.category,
     required this.rooms,
     required this.bathrooms,
@@ -43,13 +42,49 @@ class PropertyModel {
     required this.road,
     required this.house,
     required this.fullAddress,
+    required this.landlordId,
     required this.images,
     required this.createdAt,
   });
 
+  factory PropertyModel.fromMap(Map<String, dynamic> map, String docId) {
+    // Safely parse the images list from Firestore so it doesn't get lost
+    var rawImages = map['images'];
+    List<String> parsedImages = [];
+    if (rawImages is List) {
+      parsedImages = rawImages.map((e) => e.toString()).toList();
+    } else if (rawImages is String && rawImages.isNotEmpty) {
+      parsedImages = [rawImages];
+    }
+
+    return PropertyModel(
+      id: docId,
+      category: map['category'] ?? '',
+      rooms: map['rooms']?.toString() ?? '0',
+      bathrooms: map['bathrooms']?.toString() ?? '0',
+      balcony: map['balcony']?.toString() ?? '0',
+      floorLevel: map['floorLevel']?.toString() ?? '',
+      squareFeet: map['squareFeet']?.toString() ?? '',
+      rentPrice: map['rentPrice']?.toString() ?? '0',
+      rentPeriod: map['rentPeriod'] ?? 'Monthly',
+      division: map['division'] ?? '',
+      district: map['district'] ?? '',
+      area: map['area'] ?? '',
+      coordinates: map['coordinates'] ?? '',
+      phone: map['phone'] ?? '',
+      description: map['description'] ?? '',
+      sector: map['sector'] ?? '',
+      road: map['road'] ?? '',
+      house: map['house'] ?? '',
+      fullAddress: map['fullAddress'] ?? '',
+      landlordId: map['landlordId'] ?? '',
+      images: parsedImages, // <--- Passes the parsed images safely
+      createdAt: map['createdAt'] ?? '',
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
-      'landlordId': landlordId,
       'category': category,
       'rooms': rooms,
       'bathrooms': bathrooms,
@@ -68,35 +103,9 @@ class PropertyModel {
       'road': road,
       'house': house,
       'fullAddress': fullAddress,
-      'images': images,
-      'createdAt': createdAt.toIso8601String(),
+      'landlordId': landlordId,
+      'images': images, // <--- Actually saves the images to the database
+      'createdAt': createdAt,
     };
-  }
-
-  factory PropertyModel.fromMap(Map<String, dynamic> map, String docId) {
-    return PropertyModel(
-      id: docId,
-      landlordId: map['landlordId'] ?? '',
-      category: map['category'] ?? 'Flat',
-      rooms: map['rooms'] ?? 0,
-      bathrooms: map['bathrooms'] ?? 0,
-      balcony: map['balcony'] ?? 0,
-      floorLevel: map['floorLevel'] ?? '',
-      squareFeet: map['squareFeet'] ?? '',
-      rentPrice: map['rentPrice'] ?? '0',
-      rentPeriod: map['rentPeriod'] ?? 'Monthly',
-      division: map['division'] ?? '',
-      district: map['district'] ?? '',
-      area: map['area'] ?? '',
-      coordinates: map['coordinates'] ?? '',
-      phone: map['phone'] ?? '',
-      description: map['description'] ?? '',
-      sector: map['sector'] ?? '',
-      road: map['road'] ?? '',
-      house: map['house'] ?? '',
-      fullAddress: map['fullAddress'] ?? '',
-      images: List<String>.from(map['images'] ?? []),
-      createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
-    );
   }
 }

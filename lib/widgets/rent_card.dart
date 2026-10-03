@@ -62,12 +62,13 @@ class _RentCardState extends State<RentCard> {
   }
 
   Widget _buildCardThumbnail() {
-    final images = widget.propertyData?['images'];
-
+    dynamic imagesField = widget.propertyData?['images'];
     String path = widget.imagePath;
 
-    if (images is List && images.isNotEmpty) {
-      path = images.first.toString();
+    if (imagesField is List && imagesField.isNotEmpty) {
+      path = imagesField.first.toString();
+    } else if (imagesField is String && imagesField.isNotEmpty) {
+      path = imagesField;
     }
 
     if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -75,9 +76,7 @@ class _RentCardState extends State<RentCard> {
         path,
         fit: BoxFit.cover,
         width: double.infinity,
-        errorBuilder: (context, error, stackTrace) {
-          return _imagePlaceholder();
-        },
+        errorBuilder: (context, error, stackTrace) => _imagePlaceholder(),
       );
     }
 
@@ -86,9 +85,7 @@ class _RentCardState extends State<RentCard> {
         path,
         fit: BoxFit.cover,
         width: double.infinity,
-        errorBuilder: (context, error, stackTrace) {
-          return _imagePlaceholder();
-        },
+        errorBuilder: (context, error, stackTrace) => _imagePlaceholder(),
       );
     }
 
@@ -96,9 +93,7 @@ class _RentCardState extends State<RentCard> {
       File(path),
       fit: BoxFit.cover,
       width: double.infinity,
-      errorBuilder: (context, error, stackTrace) {
-        return _imagePlaceholder();
-      },
+      errorBuilder: (context, error, stackTrace) => _imagePlaceholder(),
     );
   }
 

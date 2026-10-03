@@ -382,7 +382,7 @@ class _SelectCategoryState extends State<SelectCategory> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => _selectAndNavigate('Bachelor'),
+                          onTap: () => _selectAndNavigate('Hotel'),
                           child: Stack(
                             children: [
                               Container(

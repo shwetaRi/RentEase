@@ -1,17 +1,18 @@
 import 'dart:io';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:project_rent_ease/models/property_model.dart';
 
 class PropertyService {
   final CollectionReference _propertiesRef =
   FirebaseFirestore.instance.collection('properties');
 
-  // Let Firebase configure the bucket automatically from firebase_options.dart
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  // Paste your free API key from api.imgbb.com here:
+  final String _imgbbApiKey = '9286ebdc6828c0dbcec5f911fbcb226d';
 
-  Future<List<String>> uploadImages(List<String> localFilePaths, String docId) async {
+  Future<List<String>> uploadImages(List<String> localFilePaths) async {
     List<String> downloadUrls = [];
 
     for (int i = 0; i < localFilePaths.length; i++) {
@@ -21,17 +22,30 @@ class PropertyService {
         continue;
       }
 
-      String fileName = 'property_${DateTime.now().millisecondsSinceEpoch}_$i.jpg';
-      Reference ref = _storage.ref().child('properties/$docId/$fileName');
+      try {
+        // Use MultipartRequest to send the actual file directly
+        var request = http.MultipartRequest(
+          'POST',
+          Uri.parse('https://api.imgbb.com/1/upload'),
+        );
 
-      UploadTask uploadTask = ref.putFile(file);
-      TaskSnapshot snapshot = await uploadTask;
+        request.fields['key'] = _imgbbApiKey;
+        request.files.add(await http.MultipartFile.fromPath('image', file.path));
 
-      if (snapshot.state == TaskState.success) {
-        String downloadUrl = await snapshot.ref.getDownloadURL();
-        downloadUrls.add(downloadUrl);
-      } else {
-        throw Exception("Failed to upload image $i to Firebase Storage");
+        // Send the request and wait for the response
+        var streamedResponse = await request.send();
+        var response = await http.Response.fromStream(streamedResponse);
+
+        if (response.statusCode == 200) {
+          final jsonResponse = jsonDecode(response.body);
+          // Extract the direct image URL from ImgBB's response
+          String imageUrl = jsonResponse['data']['url'];
+          downloadUrls.add(imageUrl);
+        } else {
+          throw Exception("ImgBB Error: ${response.body}");
+        }
+      } catch (e) {
+        throw Exception("Error uploading image $i: $e");
       }
     }
 
@@ -46,11 +60,11 @@ class PropertyService {
 
     List<String> localPaths = List<String>.from(rawPropertyData['images'] ?? []);
 
-    // Now forces actual web URLs. No local paths will pollute the database.
-    List<String> firestoreImageUrls = await uploadImages(localPaths, newDocId);
+    // Upload to ImgBB and get the public URLs back
+    List<String> hostedImageUrls = await uploadImages(localPaths);
 
     Map<String, dynamic> finalData = Map<String, dynamic>.from(rawPropertyData);
-    finalData['images'] = firestoreImageUrls;
+    finalData['images'] = hostedImageUrls;
     finalData['landlordId'] = currentUserId;
 
     PropertyModel property = PropertyModel.fromMap(finalData, newDocId);

@@ -102,32 +102,14 @@ MaterialPageRoute(builder: (context) => const HomePage()),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 15),
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.grey.shade200,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        }
-                      },
-                    ),
+              const Center(
+                child: Text(
+                  "RentEase",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        "RentEase",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 40),
-                ],
+                ),
               ),
               const SizedBox(height: 35),
               const Center(

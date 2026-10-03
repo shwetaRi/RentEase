@@ -87,6 +87,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
 
     try {
       final String propertyLandlordId = widget.propertyData?['landlordId'] ?? '';
+
       await FirebaseFirestore.instance.collection('bookings').add({
         'applicantId': user.uid,
         'applicantEmail': user.email ?? '',
@@ -160,8 +161,30 @@ class _PropertyState extends State<PropertyDetailsPage> {
         width: width,
         height: height,
         fit: fit,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: width,
+          height: height,
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.broken_image, color: Colors.grey),
+        ),
       );
     }
+  }
+
+  // Helper method to safely extract images
+  List<String> _getImagesList() {
+    if (widget.propertyData != null) {
+      final dynamic imgField = widget.propertyData!['images'];
+      if (imgField is List) {
+        return imgField.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+      } else if (imgField is String && imgField.isNotEmpty) {
+        return [imgField];
+      }
+    }
+    if (widget.imagePath.isNotEmpty) {
+      return [widget.imagePath];
+    }
+    return ['assets/images/card_image_4.png'];
   }
 
   @override
@@ -192,8 +215,8 @@ class _PropertyState extends State<PropertyDetailsPage> {
         ? widget.propertyData!['squareFeet'].toString()
         : '1500';
 
-    final List<dynamic> imagePaths =
-        (widget.propertyData?['images'] as List<dynamic>?) ?? [widget.imagePath];
+    final List<String> imagePaths = _getImagesList();
+    final String bannerImage = imagePaths.isNotEmpty ? imagePaths.first : widget.imagePath;
 
     final bool isFavourite = _store.isFavorite(title);
 
@@ -205,15 +228,8 @@ class _PropertyState extends State<PropertyDetailsPage> {
             children: [
               Stack(
                 children: [
-                  imagePaths.isNotEmpty
-                      ? _buildImageWidget(
-                    imagePaths.first.toString(),
-                    width: double.infinity,
-                    height: 436,
-                    fit: BoxFit.cover,
-                  )
-                      : Image.asset(
-                    widget.imagePath,
+                  _buildImageWidget(
+                    bannerImage,
                     width: double.infinity,
                     height: 436,
                     fit: BoxFit.cover,
@@ -293,14 +309,14 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-
+                    // Hide favorite icon if viewed by a Landlord
                     if (!widget.isLandlordView)
                       GestureDetector(
                         onTap: () => _toggleFavorite(
                           title,
                           address,
                           priceAmount,
-                          imagePaths.isNotEmpty ? imagePaths.first.toString() : widget.imagePath,
+                          bannerImage,
                         ),
                         child: Container(
                           width: 33,
@@ -365,7 +381,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: _buildImageWidget(
-                                      path.toString(),
+                                      path,
                                       height: 75,
                                       fit: BoxFit.cover,
                                     ),
@@ -423,8 +439,9 @@ class _PropertyState extends State<PropertyDetailsPage> {
           ),
         ),
       ),
-      // 3. Hide bottom bar (Book Now) entirely if Landlord
-      bottomSheet: (widget.isLandlordView||widget.isAppliedView)
+
+      // Hide Book Now button if viewed by a Landlord OR if viewed from Applied Tab
+      bottomSheet: (widget.isLandlordView || widget.isAppliedView)
           ? null
           : Container(
         color: const Color(0xFFFFFFFF),
