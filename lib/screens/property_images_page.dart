@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:project_rent_ease/models/property_model.dart';
 import 'package:project_rent_ease/services/property_service.dart';
@@ -78,7 +79,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
     try {
       Map<String, dynamic> completePropertyData = {
         ...widget.propertyData,
-        'images': _selectedImages.map((e) => e.path).toList(),
+        
         'createdAt': DateTime.now().toIso8601String(),
       };
       await PropertyService().addPropertyWithImages(completePropertyData);

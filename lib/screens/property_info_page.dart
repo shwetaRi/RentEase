@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/widgets/property_counter.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
+import 'package:project_rent_ease/screens/landlord_dashboard_page.dart';
 import 'package:project_rent_ease/screens/location_contact_page.dart';
 class PropertyInfoPage extends StatefulWidget {
   final String selectedCategory;
@@ -55,6 +57,9 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
       });
     } else {
       Map<String, dynamic> propertyData = {
+        'landlordId': FirebaseAuth.instance.currentUser?.uid,
+
+
         'category': widget.selectedCategory,
         'rooms': roomTotal,
         'bathrooms': bathrooms,
@@ -400,24 +405,8 @@ class _PropertyInfoPageState extends State<PropertyInfoPage> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: const BoxDecoration(
-                            color: Colors.black,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
                       ElevatedButton(
                         onPressed: _validateAndSubmit,
                         style: ElevatedButton.styleFrom(

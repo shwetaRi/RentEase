@@ -112,7 +112,6 @@ class _PropertyState extends State<PropertyDetailsPage> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final String category = widget.propertyData?['category'] ?? 'Flat';
@@ -150,7 +149,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                 children: [
                   imagePaths.isNotEmpty
                       ? _buildImageWidget(
-                    imagePaths.first.toString(),
+              imagePaths.first.toString(),
                     width: double.infinity,
                     height: 436,
                     fit: BoxFit.cover,
@@ -307,7 +306,7 @@ class _PropertyState extends State<PropertyDetailsPage> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: _buildImageWidget(
-                                      path.toString(),
+                                        path.toString(),
                                       height: 75,
                                       fit: BoxFit.cover,
                                     ),
@@ -405,17 +404,15 @@ class _PropertyState extends State<PropertyDetailsPage> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                   ),
-                  onPressed: _isBooking ? null : _handleBookNow,
-                  child: _isBooking
-                      ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                      : const Text(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
                     'Book Now',
                     style: TextStyle(
                       fontSize: 18,

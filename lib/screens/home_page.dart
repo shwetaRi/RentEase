@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_rent_ease/widgets/category.dart';
+import 'package:project_rent_ease/screens/favorite_page.dart';
 import 'package:project_rent_ease/widgets/rent_card.dart';
 import 'package:project_rent_ease/widgets/bottom_nav_bar.dart';
 import 'package:project_rent_ease/screens/filter_page.dart';
@@ -374,15 +375,34 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavBar(
-              currentIndex: currentIndex,
-              onTap: (index) {
-                setState(() {
-                  currentIndex = index;
-                });
-              },
 
-        ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: currentIndex,
+        onTap: (index) async {
+          if (index == 2) {
+            setState(() {
+              currentIndex = 2;
+            });
+
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const FavoritePage(),
+              ),
+            );
+
+            if (mounted) {
+              setState(() {
+                currentIndex = 0;
+              });
+            }
+          } else {
+            setState(() {
+              currentIndex = index;
+            });
+          }
+        },
+      ),
 
     );
   }
