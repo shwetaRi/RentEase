@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_rent_ease/screens/signUp.dart';
 import 'package:project_rent_ease/screens/home_page.dart';
+import 'package:project_rent_ease/screens/landlord_dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,7 +12,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool isLandlord = true;
+  bool ?isLandlord ;
   bool rememberMe = false;
   bool obscurePassword = true;
   bool isLoading = false;
@@ -20,6 +21,15 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
 
   Future<void> signIn() async {
+    if (isLandlord == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select your role (Landlord or Tenant)."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     final String email = emailController.text.trim();
     final String password = passwordController.text;
 
@@ -43,12 +53,18 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login successful!")),
       );
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-            (route) => false,
-      );
+if (isLandlord==true) {
+Navigator.pushAndRemoveUntil(
+context,
+MaterialPageRoute(builder: (context) => const LandlordDashboardPage()),
+(route) => false,
+);
+} else {
+Navigator.pushAndRemoveUntil(
+context,
+MaterialPageRoute(builder: (context) => const HomePage()),
+(route) => false,
+);}
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
@@ -155,10 +171,13 @@ class _LoginPageState extends State<LoginPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         decoration: BoxDecoration(
-                          color: isLandlord
+                          color: isLandlord== true
                               ? Colors.grey.shade300
                               : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(30),
+                          border: isLandlord == true
+                              ? Border.all(color: Colors.black, width: 1.5)
+                              : Border.all(color: Colors.transparent),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -182,10 +201,13 @@ class _LoginPageState extends State<LoginPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         decoration: BoxDecoration(
-                          color: !isLandlord
+                          color: isLandlord ==false
                               ? Colors.grey.shade300
                               : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(30),
+                          border: isLandlord == false
+                              ? Border.all(color: Colors.black, width: 1.5)
+                              : Border.all(color: Colors.transparent),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -13,7 +13,6 @@ import 'package:project_rent_ease/screens/select_category.dart';
 import 'package:project_rent_ease/screens/signUp.dart';
 import 'screens/login_page.dart';
 import 'firebase_options.dart';
-import 'screens/property_details_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +36,7 @@ class RentEase extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: LandlordDashboardPage(),
+      home: LoginPage(),
     );
   }
 }
