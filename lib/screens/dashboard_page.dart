@@ -32,9 +32,9 @@ class _DashboardPageState extends State<DashboardPage>
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         title: const Text(
-          'Rent Ease Dashboard',
+          'Tenant Dashboard',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,

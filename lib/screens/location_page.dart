@@ -3,17 +3,8 @@ import 'package:flutter/material.dart';
 class LocationPage extends StatefulWidget {
   const LocationPage({super.key});
 
-  @override
-  State<LocationPage> createState() => _LocationPageState();
-}
 
-class _LocationPageState extends State<LocationPage> {
-  String? selectedDivision;
-  String? selectedDistrict;
-  String? selectedArea;
-
-
-  final List<String> divisions = [
+  static const List<String> divisions = [
     'Dhaka',
     'Chattogram',
     'Rajshahi',
@@ -24,26 +15,46 @@ class _LocationPageState extends State<LocationPage> {
     'Mymensingh',
   ];
 
-  final List<String> districts = [
+  static const List<String> districts = [
     'Dhaka',
     'Gazipur',
     'Narayanganj',
     'Tangail',
-    'Chattogram',
-    'Cumilla',
+    'Faridpur',
+    'Jessore',
     'Noakhali',
-    'Rajshahi',
+    'Rangpur',
     'Khulna',
-    'Sylhet',
+    'pabna',
+    'Kushtia',
+    'Bandarban',
+    'Habiganj',
+
+
+
   ];
 
-  // 4 Areas
-  final List<String> areas = [
+  static const List<String> areas = [
     'Dhanmondi',
     'Badda',
     'Mirpur',
     'Banani',
+    'Mohammedpur',
+    'Wari',
+    'Maguhbar',
+    'Jatrabari',
+    'Shajahanpur',
+    'Malibugh'
   ];
+
+  @override
+  State<LocationPage> createState() => _LocationPageState();
+}
+
+class _LocationPageState extends State<LocationPage> {
+  String? selectedDivision;
+  String? selectedDistrict;
+  String? selectedArea;
 
   void resetLocation() {
     setState(() {
@@ -61,12 +72,10 @@ class _LocationPageState extends State<LocationPage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF9FD),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFF9FD),
         elevation: 0,
         centerTitle: true,
-
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back,
@@ -77,7 +86,6 @@ class _LocationPageState extends State<LocationPage> {
             Navigator.pop(context);
           },
         ),
-
         title: const Text(
           'Select area',
           style: TextStyle(
@@ -86,7 +94,6 @@ class _LocationPageState extends State<LocationPage> {
             color: Colors.black,
           ),
         ),
-
         actions: [
           TextButton(
             onPressed: resetLocation,
@@ -100,85 +107,64 @@ class _LocationPageState extends State<LocationPage> {
           ),
         ],
       ),
-
       body: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 24,
           vertical: 28,
         ),
-
         child: Column(
           children: [
-
-
             _buildDropdown(
               hint: 'Division',
               value: selectedDivision,
-              items: divisions,
+              items: LocationPage.divisions,
               enabled: true,
-
               onChanged: (value) {
                 setState(() {
                   selectedDivision = value;
-
-
                   selectedDistrict = null;
                   selectedArea = null;
                 });
               },
             ),
-
             const SizedBox(height: 40),
-
             _buildDropdown(
               hint: 'District',
               value: selectedDistrict,
-              items: districts,
+              items: LocationPage.districts,
               enabled: divisionSelected,
-
               onChanged: (value) {
                 setState(() {
                   selectedDistrict = value;
-
                   selectedArea = null;
                 });
               },
             ),
-
             const SizedBox(height: 40),
-
-
             _buildDropdown(
               hint: 'Area',
               value: selectedArea,
-              items: areas,
+              items: LocationPage.areas,
               enabled: districtSelected,
-
               onChanged: (value) {
                 setState(() {
                   selectedArea = value;
                 });
               },
             ),
-
             const SizedBox(height: 40),
-
-
             SizedBox(
               width: double.infinity,
               height: 56,
-
               child: ElevatedButton(
                 onPressed: areaSelected
                     ? () {
-
                   Navigator.pop(
                     context,
                     selectedArea,
                   );
                 }
                     : null,
-
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFF9834D),
                   disabledBackgroundColor: const Color(0xFFE0D8D5),
@@ -187,7 +173,6 @@ class _LocationPageState extends State<LocationPage> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-
                 child: const Text(
                   'Show Property',
                   style: TextStyle(
@@ -204,8 +189,6 @@ class _LocationPageState extends State<LocationPage> {
     );
   }
 
-
-
   Widget _buildDropdown({
     required String hint,
     required String? value,
@@ -217,16 +200,12 @@ class _LocationPageState extends State<LocationPage> {
       height: 72,
       decoration: BoxDecoration(
         border: Border.all(
-          color: enabled
-              ? const Color(0xFF9A9599)
-              : const Color(0xFFD8D3D6),
+          color: enabled ? const Color(0xFF9A9599) : const Color(0xFFD8D3D6),
           width: 1.3,
         ),
         borderRadius: BorderRadius.circular(8),
       ),
-
       padding: const EdgeInsets.symmetric(horizontal: 16),
-
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
@@ -235,17 +214,13 @@ class _LocationPageState extends State<LocationPage> {
             Icons.arrow_drop_down,
             size: 28,
           ),
-
           hint: Text(
             hint,
             style: TextStyle(
               fontSize: 18,
-              color: enabled
-                  ? const Color(0xFF555158)
-                  : const Color(0xFFB8B2B6),
+              color: enabled ? const Color(0xFF555158) : const Color(0xFFB8B2B6),
             ),
           ),
-
           items: items.map((item) {
             return DropdownMenuItem<String>(
               value: item,
@@ -258,7 +233,6 @@ class _LocationPageState extends State<LocationPage> {
               ),
             );
           }).toList(),
-
           onChanged: enabled ? onChanged : null,
         ),
       ),
