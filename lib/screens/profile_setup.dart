@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/profile_first.dart';
 import '../widgets/profile_second.dart';
 import 'home_page.dart';
-
+import 'login_page.dart';
 class ProfileSetupScreen extends StatefulWidget {
   final String? selectedRole;
 
@@ -103,7 +103,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomePage(),
+          builder: (context) => const LoginPage(),
         ),
             (route) => false,
       );

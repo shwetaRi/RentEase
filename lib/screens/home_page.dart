@@ -4,6 +4,10 @@ import 'package:project_rent_ease/widgets/rent_card.dart';
 import 'package:project_rent_ease/widgets/bottom_nav_bar.dart';
 import 'package:project_rent_ease/screens/filter_page.dart';
 import 'package:project_rent_ease/screens/location_page.dart';
+import 'package:project_rent_ease/models/property_model.dart';
+import 'package:project_rent_ease/services/property_service.dart';
+import 'package:project_rent_ease/screens/select_category.dart';
+
 class HomePage extends StatefulWidget {
 
 
@@ -27,6 +31,24 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Temporary Floating Action Button to post properties repeatedly
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF00A3E0),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SelectCategory()),
+          );
+        },
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'Add Property',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -278,39 +300,73 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 SizedBox(height: 20),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 4,
-                  childAspectRatio: .7,
-                  children: [
-                    RentCard(
-                        title: 'Family Flat Rent',
-                        location: 'Road #12, Block G, Dhanmondi',
-                        amount: 30000,
-                        imagePath:'assets/images/card_image_1.png'
-                    ),
-                    RentCard(
-                        title: 'Family & Professional Living',
-                        location: 'Road #10, Block C, Dhanmondi',
-                        amount: 25000,
-                        imagePath:'assets/images/card_image_3.png'
-                    ),
-                    RentCard(
-                        title: 'Her Living Hub(only Girls)',
-                        location: 'Road #11, Block D, Dhanmondi',
-                        amount: 35000,
-                        imagePath:'assets/images/card_image_4.png'
-                    ),
-                    RentCard(
-                        title: 'For Bachelor Only',
-                        location: 'Road #10, Block A, Dhanmondi',
-                        amount: 22000,
-                        imagePath:'assets/images/card_image_1.png'
-                    ),
-                  ],
+                StreamBuilder<List<PropertyModel>>(
+                  stream: PropertyService().getPropertiesStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: CircularProgressIndicator(color: Color(0xFF00A3E0)),
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(
+                          child: Text(
+                            'Error loading listings: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      );
+                    }
+
+                    final properties = snapshot.data ?? [];
+
+                    if (properties.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(
+                          child: Text(
+                            'No properties posted yet.',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.7,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 4,
+                      ),
+                      itemCount: properties.length,
+                      itemBuilder: (context, index) {
+                        final prop = properties[index];
+
+                        return RentCard(
+                          title: '${prop.category} Rent Home',
+                          location: prop.fullAddress.isNotEmpty ? prop.fullAddress : prop.area,
+                          amount: int.tryParse(prop.rentPrice) ?? 0,
+                          imagePath: prop.images.isNotEmpty
+                              ? prop.images.first
+                              : 'assets/images/card_image_1.png',
+                          propertyData: prop.toMap(),
+                        );
+                      },
+                    );
+                  },
                 ),
                 SizedBox(height: 64),
               ],
