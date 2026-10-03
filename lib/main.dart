@@ -37,7 +37,7 @@ class RentEase extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: LandlordDashboardPage(),
+      home: LoginPage(),
     );
   }
 }

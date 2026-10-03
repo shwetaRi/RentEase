@@ -50,7 +50,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProfileSetupScreen(),
+            builder: (context) => ProfileSetupPage(),
           ),
         );
       } on FirebaseAuthException catch (e) {

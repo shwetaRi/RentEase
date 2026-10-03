@@ -1,43 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:project_rent_ease/screens/home_page.dart';
 import '../widgets/profile_first.dart';
 import '../widgets/profile_second.dart';
-import 'home_page.dart';
-import 'login_page.dart';
-class ProfileSetupScreen extends StatefulWidget {
-  final String? selectedRole;
 
-  const ProfileSetupScreen({
-    super.key,
-    this.selectedRole,
-  });
+class ProfileSetupPage extends StatefulWidget {
+  const ProfileSetupPage({super.key});
 
   @override
-  State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
+  State<ProfileSetupPage> createState() => _ProfileSetupPageState();
 }
 
-class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  final PageController _pageController = PageController();
-  int _currentStep = 0;
-  bool _isLoading = false;
+class _ProfileSetupPageState extends State<ProfileSetupPage> {
+  // Explicitly initialize PageController to 0 so it always starts at Step 1
+  final PageController _pageController = PageController(initialPage: 0);
 
-  late String _selectedRole;
-
+  // Step 1 Controllers & State
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nidController = TextEditingController();
+  String _selectedRole = 'Tenant';
+
+  // Step 2 Controllers & State
   final TextEditingController _occupationController = TextEditingController();
   final TextEditingController _institutionController = TextEditingController();
   String _selectedGender = 'Male';
   String _selectedMaritalStatus = 'Single';
 
-  @override
-  void initState() {
-    super.initState();
-    _selectedRole = widget.selectedRole ?? 'Tenant';
-  }
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -50,130 +41,110 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     super.dispose();
   }
 
+  // Move from Step 1 to Step 2
+  void _goToStepTwo() {
+    _pageController.animateToPage(
+      1,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  // Move from Step 2 back to Step 1
+  void _goToStepOne() {
+    _pageController.animateToPage(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  // Complete Profile Setup & Submit to Firestore
   Future<void> _handleProfileSubmit() async {
-    debugPrint('Complete Button Tapped');
-
-    final User? currentUser = FirebaseAuth.instance.currentUser;
-    debugPrint('Current User: ${currentUser?.uid}');
-
-    if (currentUser == null) {
-      debugPrint('User is NULL! Aborting submit. ');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: No active user session.')),
-        );
-      }
-      return;
-    }
-
     setState(() => _isLoading = true);
 
     try {
-      debugPrint('Writing to Firestore');
+      final User? currentUser = FirebaseAuth.instance.currentUser;
 
+      if (currentUser == null) {
+        throw Exception("User session not found. Please log in again.");
+      }
+
+      // Save combined data from Step 1 and Step 2 into Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
           .set({
-        'fullName': _usernameController.text.trim(),
-        'phone': _phoneController.text.trim(),
-        'nidNumber': _nidController.text.trim(),
+        'username': _usernameController.text.trim(),
         'role': _selectedRole,
+        'phone': _phoneController.text.trim(),
+        'nid': _nidController.text.trim(),
         'gender': _selectedGender,
         'maritalStatus': _selectedMaritalStatus,
         'occupation': _occupationController.text.trim(),
         'institution': _institutionController.text.trim(),
-        'isProfileComplete': true,
+        'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      debugPrint('Firestore Write Successful');
+      // Asynchronous context safety check
+      if (!mounted) return;
 
-      if (!mounted) {
-        debugPrint('Widget is no longer mounted');
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile setup completed!')),
-      );
-
-      debugPrint('Executing Navigation to HomePage');
-
+      // Navigate to Home/MainShellPage and clear entire route stack
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const LoginPage(),
+          builder: (context) => const HomePage(), // Replace with MainShellPage()
         ),
             (route) => false,
       );
-
-      debugPrint('Navigation Command Sent');
-
-    } catch (e, stackTrace) {
-      debugPrint('Navigation error $e');
-      debugPrint(stackTrace.toString());
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save profile: $e')),
-        );
-      }
+    } on FirebaseException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? "Failed to save profile details."),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
+      // Always reset loading indicator if navigation didn't take place
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
   }
 
-  void _nextPage() {
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void _previousPage() {
-    _pageController.previousPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Profile Setup',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
+        title: const Text('Profile Setup'),
         elevation: 0,
-        centerTitle: true,
-        leading: _currentStep > 0
-            ? IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: _previousPage,
-        )
-            : null,
+        automaticallyImplyLeading: false, // Disables top back button to prevent escaping setup
       ),
       body: PageView(
         controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (index) {
-          setState(() => _currentStep = index);
-        },
+        physics: const NeverScrollableScrollPhysics(), // Disables manual swiping
         children: [
+          // Step 1 Widget
           ProfileStepOneWidget(
             usernameController: _usernameController,
             phoneController: _phoneController,
             nidController: _nidController,
             selectedRole: _selectedRole,
             onRoleChanged: (val) => setState(() => _selectedRole = val),
-            onNext: _nextPage,
+            onNext: _goToStepTwo,
           ),
+
+          // Step 2 Widget
           ProfileStepTwoWidget(
             _occupationController,
             _institutionController,
@@ -181,8 +152,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 (val) => setState(() => _selectedGender = val),
             _selectedMaritalStatus,
                 (val) => setState(() => _selectedMaritalStatus = val),
-            _previousPage,
-            _handleProfileSubmit,
+            _goToStepOne,          // Back button callback
+            _handleProfileSubmit, // Complete button callback
             isLoading: _isLoading,
           ),
         ],

@@ -54,34 +54,46 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
           const SizedBox(height: 24),
 
           DropdownButtonFormField<String>(
-            initialValue: widget.selectedGender,
+            value: widget.selectedGender.isEmpty ? null : widget.selectedGender,
             decoration: _inputDecoration('Gender'),
             items: const [
               DropdownMenuItem(value: 'Male', child: Text('Male')),
               DropdownMenuItem(value: 'Female', child: Text('Female')),
               DropdownMenuItem(value: 'Other', child: Text('Other')),
             ],
-            onChanged: (val) {
+            onChanged: widget.isLoading
+                ? null
+                : (val) {
               if (val != null) widget.onGenderChanged(val);
             },
+            validator: (val) =>
+            (val == null || val.isEmpty) ? 'Please select gender' : null,
           ),
           const SizedBox(height: 16),
 
           DropdownButtonFormField<String>(
-            initialValue: widget.selectedMaritalStatus,
+            value: widget.selectedMaritalStatus.isEmpty
+                ? null
+                : widget.selectedMaritalStatus,
             decoration: _inputDecoration('Marital Status'),
             items: const [
               DropdownMenuItem(value: 'Single', child: Text('Single')),
               DropdownMenuItem(value: 'Married', child: Text('Married')),
             ],
-            onChanged: (val) {
+            onChanged: widget.isLoading
+                ? null
+                : (val) {
               if (val != null) widget.onMaritalStatusChanged(val);
             },
+            validator: (val) => (val == null || val.isEmpty)
+                ? 'Please select marital status'
+                : null,
           ),
           const SizedBox(height: 16),
 
           TextFormField(
             controller: widget.occupationController,
+            enabled: !widget.isLoading,
             decoration: _inputDecoration('Occupation'),
             validator: (val) {
               if (val == null || val.trim().isEmpty) {
@@ -94,6 +106,7 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
 
           TextFormField(
             controller: widget.institutionController,
+            enabled: !widget.isLoading,
             decoration: _inputDecoration('Institution / Company'),
             validator: (val) {
               if (val == null || val.trim().isEmpty) {
@@ -104,7 +117,7 @@ class _ProfileStepTwoWidgetState extends State<ProfileStepTwoWidget> {
           ),
           const SizedBox(height: 32),
 
-          //Buttons
+          // Buttons Row
           Row(
             children: [
               Expanded(
