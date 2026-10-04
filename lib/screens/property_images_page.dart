@@ -80,7 +80,7 @@ class _PropertyImagesPageState extends State<PropertyImagesPage> {
     try {
       Map<String, dynamic> completePropertyData = {
         ...widget.propertyData,
-        
+        'images': _selectedImages.map((img) => img.path).toList(),
         'createdAt': DateTime.now().toIso8601String(),
       };
       await PropertyService().addPropertyWithImages(completePropertyData);
